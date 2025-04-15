@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "prisma:deploy": "npx prisma migrate deploy && prisma generate",
     "seed": "ts-node src/seed/seed-database",
     "clean:hard": "rm -rf node_modules .next",
     "clean:soft": "rm -rf .next"
