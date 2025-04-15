@@ -57,7 +57,7 @@ export default function Header() {
         </div>
         <nav className="flex md:hidden gap-6">
           {["Newsletters", "Images", "Videos"].map((item) => (
-            <Link key={item} href={`/#${item.toLowerCase().replace(" ", "-")}`}>
+            <Link key={item} href={`/platform/${item.toLowerCase().replace(" ", "-")}`}>
               <motion.span
                 className="text-sm font-medium text-muted-foreground hover:text-primary"
                 whileHover={{ scale: 1.05 }}
