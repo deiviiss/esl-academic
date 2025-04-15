@@ -29,15 +29,14 @@ export const registerUser = async (data: RegisterUser) => {
 
     return {
       ok: true,
-      message: 'Usuario creado correctamente',
+      message: 'User created successfully',
       user
     }
   } catch (error) {
-
-    console.error('Error al crear el usuario', error)
+    console.error('Error creating user', error)
     return {
       ok: false,
-      message: 'Error al crear el usuario'
+      message: 'Error creating user'
     }
   }
 }

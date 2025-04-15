@@ -16,23 +16,23 @@ export const toggleUserStatus = async ({ id, status }: Props) => {
     if (!isAdmin) {
       return {
         ok: false,
-        message: 'Debe estar autenticado como administrador'
+        message: 'You must be authenticated as an administrator'
       }
     }
 
     const newStatus = !status
 
-    const userDeleted = await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id },
       data: {
         isActive: newStatus
       }
     })
 
-    if (!userDeleted) {
+    if (!updatedUser) {
       return {
         ok: false,
-        message: 'Usuario no encontrado'
+        message: 'User not found'
       }
     }
 
@@ -40,13 +40,13 @@ export const toggleUserStatus = async ({ id, status }: Props) => {
 
     return {
       ok: true,
-      message: userDeleted.isActive ? 'Usuario activado correctamente' : 'Usuario desactivado correctamente'
+      message: updatedUser.isActive ? 'User successfully activated' : 'User successfully deactivated'
     }
   } catch (error) {
-    console.error('Error al cambiar el estado del usuario:', error)
+    console.error('Error changing user status:', error)
     return {
       ok: false,
-      message: 'Error al desactivar usuario, contacta a soporte'
+      message: 'Error deactivating user, please contact support'
     }
   }
 }

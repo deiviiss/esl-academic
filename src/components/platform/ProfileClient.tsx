@@ -1,13 +1,13 @@
 'use client'
 
-import { useState } from "react"
+import { useRef, useState } from "react"
 import { ButtonLogout } from '@/components/auth/ButtonLogout'
 import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Bell, BookOpen, CreditCard, Settings, User as UserIcon } from "lucide-react"
+import { Bell, BookOpen, CreditCard, Loader, Settings, Upload, User as UserIcon, X } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
@@ -19,6 +19,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { noticeFailure, noticeSuccess } from "@/components//toast-notifications/ToastNotifications"
 import { updateUser } from "@/actions/users/update-user"
 import { updateUserPassword } from "@/actions/users/update-user-password"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { updateUserImage } from "@/actions/users/update-user-image"
 
 const userSchema = z.object({
   name: z.string().min(3, { message: 'Name is required' }).max(255, { message: 'Name must be less than 255 characters' }),
@@ -57,6 +59,10 @@ export const ProfileClient = ({ user }: profileProps) => {
   const [activeTab, setActiveTab] = useState("personal")
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false)
+  const [avatarPreview, setAvatarPreview] = useState<string>(user.image || 'imgs/avatar.png')
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const defaultValuesUserInfo = {
     name: user.name || '',
@@ -132,6 +138,67 @@ export const ProfileClient = ({ user }: profileProps) => {
     formPassword.reset()
   }
 
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        setAvatarPreview(reader.result as string)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleAvatarUpload = async () => {
+    setIsSubmitting(true)
+    const image = fileInputRef.current?.files?.[0];
+    if (!image) {
+      noticeFailure("No file selected");
+      setIsSubmitting(false);
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", image);
+
+    try {
+      // Upload the image to 
+      const res = await fetch("/api/upload-avatar", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!data.ok) {
+        noticeFailure(data.message || "Upload failed");
+        return;
+      }
+
+      const { ok, message } = await updateUserImage(data.url)
+
+      if (!ok) {
+        noticeFailure(message || "Error uploading image")
+        return
+      }
+
+      noticeSuccess("Profile picture updated successfully");
+    } catch (error) {
+      console.error("Error uploading image:", error);
+      noticeFailure("An error occurred while uploading the image");
+    } finally {
+      setIsSubmitting(false)
+      setAvatarModalOpen(false);
+    }
+  };
+
+  const clearAvatarPreview = () => {
+    setAvatarPreview('/imgs/avatar.png')
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }
+
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -177,7 +244,12 @@ export const ProfileClient = ({ user }: profileProps) => {
               <Badge className="mt-2" variant="secondary">
                 {user.subscriptionPlan?.name || "Level Unknown"}
               </Badge>
-              <Button variant="outline" size="sm" className="mt-4 w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4 w-full"
+                onClick={() => setAvatarModalOpen(true)}
+              >
                 Change Avatar
               </Button>
             </CardContent>
@@ -203,6 +275,7 @@ export const ProfileClient = ({ user }: profileProps) => {
           </Card>
         </motion.div>
 
+        {/* Main content Tabs */}
         <motion.div variants={fadeInUp}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <div className="overflow-x-auto scrollbar-hide">
@@ -583,6 +656,76 @@ export const ProfileClient = ({ user }: profileProps) => {
             </TabsContent>
           </Tabs>
         </motion.div>
+
+        {/* Avatar Change Modal */}
+        <Dialog open={avatarModalOpen} onOpenChange={setAvatarModalOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>Change Profile Picture</DialogTitle>
+              <DialogDescription>
+                Upload a new profile picture. The image should be square and at least 200x200 pixels.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="grid gap-4 py-4">
+              <div className="flex flex-col items-center gap-4">
+                <Avatar className="h-32 w-32">
+                  <AvatarImage src={avatarPreview || "/imgs/avatar.png"} alt="Preview" />
+                  <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+
+                {avatarPreview ? (
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline" size="sm"
+                      onClick={clearAvatarPreview}
+                      disabled={isSubmitting}
+                    >
+                      <X className="h-4 w-4 mr-2" />
+                      Clear
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isSubmitting}
+                    >
+                      <Upload className="h-4 w-4 mr-2" />
+                      Change
+                    </Button>
+                  </div>
+                ) : (
+                  <Button
+                    disabled={isSubmitting}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="h-4 w-4 mr-2" />
+                    Upload Image
+                  </Button>
+                )}
+
+                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+              </div>
+            </div>
+
+            <DialogFooter className="flex flex-col gap-3 sm:flex-row">
+              <Button
+                variant="outline"
+                disabled={isSubmitting}
+                onClick={() => setAvatarModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button
+                onClick={handleAvatarUpload}
+                disabled={!avatarPreview || isSubmitting}
+              >
+                {isSubmitting ? <>
+                  Saving
+                  <Loader className="animate-spin h-4 w-4 mr-2" />
+                </> : "Save Changes"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </motion.div>
   )
