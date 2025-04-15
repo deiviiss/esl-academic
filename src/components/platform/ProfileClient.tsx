@@ -205,8 +205,8 @@ export const ProfileClient = ({ user }: profileProps) => {
 
         <motion.div variants={fadeInUp}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="overflow-hidden">
-              <TabsList >
+            <div className="overflow-x-auto scrollbar-hide">
+              <TabsList className="flex w-max gap-2">
                 {navItems.map((item) => (
                   <TabsTrigger key={item.value} value={item.value}>
                     {item.label}
