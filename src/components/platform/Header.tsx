@@ -1,16 +1,15 @@
 "use client"
 
-import { useSession } from 'next-auth/react'
 import { Button } from "@/components/ui/button"
 import { BookOpen } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { ToogleDarkMode } from '../dark-mode/toogle-dark-mode/toogle-dark-mode'
+import { usePathname } from 'next/navigation'
 
 export default function Header() {
-  const { data: session } = useSession()
-  const isAuthenticated = !!session?.user
-  const isAdmin = session?.user?.role === 'admin'
+  const path = usePathname()
+  const isProfilePage = path.includes('/platform/profile')
 
   return (
     <motion.header
@@ -26,8 +25,8 @@ export default function Header() {
             <span className="text-xl font-bold">Ms. Kelly ESL Academy</span>
           </Link>
           <nav className="hidden md:flex gap-6">
-            {["About", "Our Method", "Testimonials", "Contact"].map((item) => (
-              <Link key={item} href={`/#${item.toLowerCase().replace(" ", "-")}`}>
+            {["Newsletters", "Images", "Videos"].map((item) => (
+              <Link key={item} href={`/platform/${item.toLowerCase().replace(" ", "-")}`}>
                 <motion.span
                   className="text-sm font-medium text-muted-foreground hover:text-primary"
                   whileHover={{ scale: 1.05 }}
@@ -44,31 +43,20 @@ export default function Header() {
               asChild
             >
               {
-                isAuthenticated ? (
-                  <Link href={isAdmin ? "/platform/profile" : "/platform/profile"} >
-                    <motion.span
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {isAdmin ? "Admin" : "Profile"}
-                    </motion.span>
-                  </Link>
-                ) : (
-                  <Link href="/auth/login">
-                    <motion.span
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      Get Started
-                    </motion.span>
-                  </Link>
-                )
+                <Link href={isProfilePage ? "/platform" : "/platform/profile"} >
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {isProfilePage ? "Home" : "Profile"}
+                  </motion.span>
+                </Link>
               }
             </Button>
           </div>
         </div>
         <nav className="flex md:hidden gap-6">
-          {["About", "Our Method", "Testimonials", "Contact"].map((item) => (
+          {["Newsletters", "Images", "Videos"].map((item) => (
             <Link key={item} href={`/#${item.toLowerCase().replace(" ", "-")}`}>
               <motion.span
                 className="text-sm font-medium text-muted-foreground hover:text-primary"

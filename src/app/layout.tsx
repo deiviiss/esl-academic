@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { textFont } from "@/config/fonts";
+import { Providers } from "@/components/providers/Providers";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: "Ms. Kelly ESL Academy - Learn English Naturally",
@@ -39,8 +41,11 @@ export default function RootLayout({
       <body
         className={`${textFont.className} antialiased`}
       >
-        {children}
+        <Providers>
+          {children}
+          <Toaster />
+        </Providers>
       </body>
-    </html>
+    </html >
   );
 }
