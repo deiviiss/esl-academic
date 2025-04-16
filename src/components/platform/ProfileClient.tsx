@@ -256,7 +256,7 @@ export const ProfileClient = ({ user }: profileProps) => {
           </Card>
 
           {/* sidebar navigation */}
-          <Card>
+          <Card >
             <CardContent className="p-4">
               <nav className="space-y-2">
                 {navItems.map((item) => (
@@ -278,7 +278,7 @@ export const ProfileClient = ({ user }: profileProps) => {
         {/* Main content Tabs */}
         <motion.div variants={fadeInUp}>
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <div className="overflow-x-auto scrollbar-hide">
+            <div className="overflow-x-auto scrollbar-hide hidden md:block">
               <TabsList className="flex w-max gap-2">
                 {navItems.map((item) => (
                   <TabsTrigger key={item.value} value={item.value}>
