@@ -21,6 +21,7 @@ import { updateUser } from "@/actions/users/update-user"
 import { updateUserPassword } from "@/actions/users/update-user-password"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { updateUserImage } from "@/actions/users/update-user-image"
+import { deleteUserImage } from "@/actions/users/delete-user-image"
 
 const userSchema = z.object({
   name: z.string().min(3, { message: 'Name is required' }).max(255, { message: 'Name must be less than 255 characters' }),
@@ -162,6 +163,13 @@ export const ProfileClient = ({ user }: profileProps) => {
     formData.append("image", image);
 
     try {
+      const { ok: okDeleteImage } = await deleteUserImage(user.image || '')
+
+      if (!okDeleteImage) {
+        noticeFailure("Error deleting old image, please contact support")
+        return
+      }
+
       // Upload the image to 
       const res = await fetch("/api/upload-avatar", {
         method: "POST",
