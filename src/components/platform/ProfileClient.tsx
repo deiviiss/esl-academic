@@ -152,7 +152,9 @@ export const ProfileClient = ({ user }: profileProps) => {
 
   const handleAvatarUpload = async () => {
     setIsSubmitting(true)
+
     const image = fileInputRef.current?.files?.[0];
+
     if (!image) {
       noticeFailure("No file selected");
       setIsSubmitting(false);
@@ -244,7 +246,11 @@ export const ProfileClient = ({ user }: profileProps) => {
           <Card>
             <CardContent className="p-6 flex flex-col items-center">
               <Avatar className="h-24 w-24 mb-4">
-                <AvatarImage src={user.image || "/imgs/avatar.png"} alt="Profile" />
+                <AvatarImage
+                  src={user.image || "/imgs/avatar.png"}
+                  alt="Profile"
+                  className="object-cover"
+                />
                 <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
               </Avatar>
               <h2 className="text-xl font-semibold">{user.name}</h2>
@@ -665,6 +671,7 @@ export const ProfileClient = ({ user }: profileProps) => {
           </Tabs>
         </motion.div>
 
+        {/* TODO: create component */}
         {/* Avatar Change Modal */}
         <Dialog open={avatarModalOpen} onOpenChange={setAvatarModalOpen}>
           <DialogContent className="sm:max-w-[425px]">
@@ -678,7 +685,11 @@ export const ProfileClient = ({ user }: profileProps) => {
             <div className="grid gap-4 py-4">
               <div className="flex flex-col items-center gap-4">
                 <Avatar className="h-32 w-32">
-                  <AvatarImage src={avatarPreview || "/imgs/avatar.png"} alt="Preview" />
+                  <AvatarImage
+                    src={avatarPreview || "/imgs/avatar.png"}
+                    alt="Preview"
+                    className="object-cover"
+                  />
                   <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
 

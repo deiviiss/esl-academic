@@ -8,6 +8,13 @@ const imageSchema = z.string().url("Invalid image URL");
 cloudinary.config(process.env.CLOUDINARY_URL ?? "");
 
 export const deleteUserImage = async (imageUrl: string) => {
+  if (!imageUrl || imageUrl.trim() === "") {
+    return {
+      ok: true,
+      message: "No image to delete"
+    };
+  }
+
   const imageParsed = imageSchema.safeParse(imageUrl);
 
   if (!imageParsed.success) {

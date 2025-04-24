@@ -16,6 +16,7 @@ export const ButtonLogout = ({ className, icon, name }: Props) => {
       variant={'outline'}
       onClick={async () => {
         await logout()
+        window.location.replace('/')
       }}
       className={className}
     >
