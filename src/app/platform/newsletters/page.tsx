@@ -1,34 +1,38 @@
-'use client'
+import NewsletterList from "@/components/platform/newsletters/NewsletterList"
+import type { Metadata } from "next"
 
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { motion } from "framer-motion";
+export const metadata: Metadata = {
+  title: "Newsletters | Ms. Kelly ESL Academy",
+  description: "Browse our monthly newsletters for different academic levels.",
+}
+
+// Simulación de obtención de datos
+const getNewslettersByLevel = () => {
+  // En una aplicación real, esto vendría de una API o base de datos
+  return {
+    toddlers: [
+      { id: "n1", title: "April 2025 Newsletter", month: "2025-04-01" },
+      { id: "n2", title: "May 2025 Newsletter", month: "2025-05-01" },
+      { id: "n5", title: "March 2025 Newsletter", month: "2025-03-01" },
+      { id: "n6", title: "February 2025 Newsletter", month: "2025-02-01" },
+    ],
+    nursery: [
+      { id: "n3", title: "April 2025 Newsletter", month: "2025-04-01" },
+      { id: "n7", title: "March 2025 Newsletter", month: "2025-03-01" },
+      { id: "n8", title: "February 2025 Newsletter", month: "2025-02-01" },
+      { id: "n9", title: "January 2025 Newsletter", month: "2025-01-01" },
+    ],
+    prek: [
+      { id: "n4", title: "May 2025 Newsletter", month: "2025-05-01" },
+      { id: "n10", title: "April 2025 Newsletter", month: "2025-04-01" },
+      { id: "n11", title: "March 2025 Newsletter", month: "2025-03-01" },
+      { id: "n12", title: "February 2025 Newsletter", month: "2025-02-01" },
+    ],
+  }
+}
 
 export default function NewslettersPage() {
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className='max-w-sm mx-auto'>
-        <CardHeader className="text-center">
-          <CardTitle className="text-2xl font-bold">Newsletters</CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">Latest updates and news</CardDescription>
-        </CardHeader>
+  const newslettersByLevel = getNewslettersByLevel()
 
-        <CardContent className="flex flex-col items-center justify-center p-6">
-          <h2 className="text-lg font-semibold">Welcome to the Newsletters section!</h2>
-          <p className="text-sm text-muted-foreground">Here you can find all the latest newsletters and updates.</p>
-          <p className="text-sm text-muted-foreground">Please check your email for the latest updates.</p>
-        </CardContent>
-        <CardFooter className="flex flex-col items-center justify-center p-6">
-          <p className="text-sm text-muted-foreground">Stay tuned for more updates!</p>
-          <p className="text-sm text-muted-foreground">We appreciate your support!</p>
-          <p className="text-sm text-muted-foreground">Best wishes,</p>
-          <p className="text-sm text-muted-foreground">The Ms. Kelly ESL Academy Team</p>
-        </CardFooter>
-
-      </Card>
-    </motion.div>
-  );
+  return <NewsletterList newslettersByLevel={newslettersByLevel} />
 }
