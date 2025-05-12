@@ -60,7 +60,7 @@ export default function ClassroomMoments({ moments }: ClassroomMomentsProps) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl md:text-4xl font-bold text-primary flex items-center justify-center gap-2">
+        <h1 className="text-xl min-[348px]:text-2xl min-[404px]:text-3xl md:text-4xl font-bold text-primary flex items-center justify-center gap-2">
           <Video className="h-8 w-8" />
           Classroom Moments
         </h1>

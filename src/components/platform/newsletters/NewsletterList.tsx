@@ -6,7 +6,7 @@ import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, ChevronRight, GraduationCap } from "lucide-react"
+import { Calendar, ChevronRight, GraduationCap, Newspaper } from "lucide-react"
 import Link from "next/link"
 
 interface Newsletter {
@@ -50,7 +50,10 @@ export default function NewsletterList({ newslettersByLevel }: NewsletterListPro
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h1 className="text-3xl md:text-4xl font-bold text-primary">Newsletters</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-primary flex items-center justify-center gap-2">
+          <Newspaper className="h-8 w-8" />
+          Newsletters
+        </h1>
         <p className="text-muted-foreground mt-2">Browse our monthly newsletters by academic level</p>
       </motion.div>
 
