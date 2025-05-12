@@ -24,8 +24,9 @@ export default function Header() {
             <BookOpen className="h-6 w-6 text-primary" />
             <span className="text-xl font-bold">Ms. Kelly ESL Academy</span>
           </Link>
+
           <nav className="hidden md:flex gap-6">
-            {["Newsletters", "Images", "Videos"].map((item) => (
+            {["Newsletters", "Learning", "Moments"].map((item) => (
               <Link key={item} href={`/platform/${item.toLowerCase().replace(" ", "-")}`}>
                 <motion.span
                   className="text-sm font-medium text-muted-foreground hover:text-primary"
@@ -56,7 +57,7 @@ export default function Header() {
           </div>
         </div>
         <nav className="flex md:hidden gap-6">
-          {["Newsletters", "Images", "Videos"].map((item) => (
+          {["Newsletters", "Learning", "Moments"].map((item) => (
             <Link key={item} href={`/platform/${item.toLowerCase().replace(" ", "-")}`}>
               <motion.span
                 className="text-sm font-medium text-muted-foreground hover:text-primary"
