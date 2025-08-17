@@ -1,11 +1,11 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { BookOpen } from "lucide-react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { ToogleDarkMode } from '../dark-mode/toogle-dark-mode/toogle-dark-mode'
 import { usePathname } from 'next/navigation'
+import Image from "next/image"
 
 export default function Header() {
   const path = usePathname()
@@ -21,8 +21,12 @@ export default function Header() {
       <div className="container flex flex-col md:h-16 items-center justify-between p-3 gap-2">
         <div className="flex items-center justify-between w-full">
           <Link href="/" className="flex items-center space-x-2">
-            <BookOpen className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Ms. Kelly ESL Academy</span>
+            <Image
+              src="/logo.webp"
+              alt="Miss Kelly ESL Academy"
+              width={100}
+              height={0}
+            />
           </Link>
 
           <nav className="hidden md:flex gap-6">

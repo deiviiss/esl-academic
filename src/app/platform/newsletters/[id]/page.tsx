@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
   }
 
   return {
-    title: `${newsletter.title} | Ms. Kelly ESL Academy`,
+    title: `${newsletter.title} | Miss Kelly ESL Academy`,
     description: `Monthly newsletter with learning materials and important information for parents.`,
   }
 }

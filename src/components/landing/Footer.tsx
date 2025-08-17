@@ -8,7 +8,7 @@ export default function Footer() {
         <div className="flex flex-col space-y-4">
           <Link href="/" className="flex items-center space-x-2">
             <BookOpen className="h-6 w-6 text-primary" />
-            <span className="font-bold">Ms. Kelly ESL Academy</span>
+            <span className="font-bold">Miss Kelly ESL Academy</span>
           </Link>
           <p className="text-sm text-muted-foreground">Inspiring confident English speakers</p>
         </div>
@@ -26,7 +26,9 @@ export default function Footer() {
       </div>
       <div className="border-t">
         <div className="container flex flex-col gap-2 py-4 md:flex-row md:justify-between md:gap-0">
-          <p className="text-xs text-muted-foreground">© 2024 Ms. Kelly ESL Academy. All rights reserved.</p>
+          <p className="text-xs text-muted-foreground">
+            © {new Date().getFullYear()} Miss Kelly ESL Academy. All rights reserved.
+          </p>
         </div>
       </div>
     </footer>

@@ -5,12 +5,12 @@ import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
-  title: "Ms. Kelly ESL Academy - Learn English Naturally",
+  title: "Miss Kelly ESL Academy - Learn English Naturally",
   description:
-    "Join Ms. Kelly ESL Academy to learn English through engaging lessons and a supportive environment. Perfect for young learners looking to become confident English speakers.",
-  keywords: ["ESL", "English learning", "children education", "language skills"],
+    "Join Miss Kelly ESL Academy to learn English through engaging lessons and a supportive environment. Perfect for young learners looking to become confident English speakers.",
+  keywords: ["ESL", "English learning", "children education", "language skills", "Miss Kelly", "academy", "young learners", "English lessons", "Quick Learning"],
   openGraph: {
-    title: "Ms. Kelly ESL Academy - Learn English Naturally",
+    title: "Miss Kelly ESL Academy - Learn English Naturally",
     description:
       "Inspire young learners to become confident English speakers through engaging lessons and a supportive environment.",
     images: [
@@ -18,13 +18,13 @@ export const metadata: Metadata = {
         url: "/og-image.jpg",
         width: 1200,
         height: 630,
-        alt: "Ms. Kelly ESL Academy",
+        alt: "Miss Kelly ESL Academy",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Ms. Kelly ESL Academy - Learn English Naturally",
+    title: "Miss Kelly ESL Academy - Learn English Naturally",
     description:
       "Inspire young learners to become confident English speakers through engaging lessons and a supportive environment.",
     images: ["/twitter-image.jpg"],

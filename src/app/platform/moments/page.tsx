@@ -2,7 +2,7 @@ import ClassroomMoments from "@/components/platform/moments/ClassroomMoments"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Classroom Moments | Ms. Kelly ESL Academy",
+  title: "Classroom Moments | Miss Kelly ESL Academy",
   description: "Short videos captured during classes showing children's progress and activities",
 }
 

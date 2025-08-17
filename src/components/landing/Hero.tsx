@@ -26,7 +26,7 @@ export default function Hero({ videoUrl }: HeroProps) {
                 Learn English the Natural Way
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                At Ms. Kelly ESL academy, our mission is to inspire young learners to become confident English speakers
+                At Miss Kelly ESL academy, our mission is to inspire young learners to become confident English speakers
                 through engaging lessons and a supportive environment.
               </p>
             </div>

@@ -9,12 +9,12 @@ import { titleFont } from "@/config/fonts"
 
 const testimonials = [
   {
-    text: "I have a 2-year-old and we have been using this method for teaching English. I cannot thank Ms. Kelly enough for this technique and the support! We are halfway through our learning journey, and it blows my mind each day that my daughter can learn this way.",
+    text: "I have a 2-year-old and we have been using this method for teaching English. I cannot thank Miss Kelly enough for this technique and the support! We are halfway through our learning journey, and it blows my mind each day that my daughter can learn this way.",
     author: "Victoria P.",
     image: "/imgs/25.png",
   },
   {
-    text: "The progress we've seen in our son's English skills is remarkable. Ms. Kelly's method really works!",
+    text: "The progress we've seen in our son's English skills is remarkable. Miss Kelly's method really works!",
     author: "John D.",
     image: "/imgs/26.png",
   },

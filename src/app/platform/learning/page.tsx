@@ -2,8 +2,8 @@ import LearningVideos from "@/components/platform/learning/LearningVideos"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Learning Videos | Ms. Kelly ESL Academy",
-  description: "Educational videos created by Ms. Kelly for different academic levels",
+  title: "Learning Videos | Miss Kelly ESL Academy",
+  description: "Educational videos created by Miss Kelly for different academic levels",
 }
 
 // Simulación de obtención de datos

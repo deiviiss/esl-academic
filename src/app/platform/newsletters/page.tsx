@@ -2,7 +2,7 @@ import NewsletterList from "@/components/platform/newsletters/NewsletterList"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Newsletters | Ms. Kelly ESL Academy",
+  title: "Newsletters | Miss Kelly ESL Academy",
   description: "Browse our monthly newsletters for different academic levels.",
 }
 

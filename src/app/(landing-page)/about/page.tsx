@@ -50,7 +50,7 @@ export default function AboutPage() {
         <h1
           className={`${titleFont.className} text-4xl font-bold text-primary mb-8`}
         >
-          About Ms. Kelly ESL Academy
+          About Miss Kelly ESL Academy
         </h1>
       </motion.div>
       {/* Introduction to Our Mission */}
@@ -64,7 +64,7 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <div>
             <p className="text-base mb-4">
-              Ms. Kelly&apos;s passion for helping young learners become confident English speakers is at the heart of our
+              Miss Kelly&apos;s passion for helping young learners become confident English speakers is at the heart of our
               academy. We believe in the transformative power of language skills in children&apos;s lives, opening doors to
               new opportunities and broadening their horizons.
             </p>
@@ -77,7 +77,7 @@ export default function AboutPage() {
           >
             <Image
               src="/imgs/29.png"
-              alt="Ms. Kelly teaching students"
+              alt="Miss Kelly teaching students"
               width={400}
               height={300}
               className="rounded-lg mx-auto"
@@ -138,7 +138,7 @@ export default function AboutPage() {
       >
         <h2 className={`${titleFont.className} text-2xl font-bold mb-4`}>Our Proactive Approach</h2>
         <p className="text-base mb-4">
-          At Ms. Kelly ESL Academy, we&apos;re committed to moving from discussion to action in addressing language learning
+          At Miss Kelly ESL Academy, we&apos;re committed to moving from discussion to action in addressing language learning
           challenges. Our strategies simplify the learning process and empower students to take control of their
           language journey.
         </p>
@@ -168,18 +168,18 @@ export default function AboutPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className={`${titleFont.className} text-2xl font-bold text-primary mb-5`}>Ms. Kelly&apos;s Story</h2>
+        <h2 className={`${titleFont.className} text-2xl font-bold text-primary mb-5`}>Miss Kelly&apos;s Story</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
           <Image
             src="/imgs/30.png"
-            alt="Ms. Kelly"
+            alt="Miss Kelly"
             width={500}
             height={600}
             className="rounded-lg mx-auto"
           />
           <div>
             <p className="text-base mb-4">
-              Ms. Kelly&apos;s journey to founding the ESL Academy is rooted in her personal experiences with language
+              Miss Kelly&apos;s journey to founding the ESL Academy is rooted in her personal experiences with language
               learning. Overcoming her own challenges in mastering a second language, she was inspired to create a
               supportive and effective learning environment for young English learners.
             </p>
@@ -187,7 +187,7 @@ export default function AboutPage() {
               Her passion for education and belief in every child&apos;s potential drove her to establish an academy that not
               only teaches English but also instills confidence and a love for learning in every student.
             </p>
-            <Button variant="outline">Read Ms. Kelly&apos;s Full Story</Button>
+            <Button variant="outline">Read Miss Kelly&apos;s Full Story</Button>
           </div>
         </div>
       </motion.div>
@@ -201,7 +201,7 @@ export default function AboutPage() {
       >
         <h2 className={`${titleFont.className} text-2xl font-bold mb-4`}>Professional Experience</h2>
         <p className="text-base mb-4">
-          With over a decade of teaching experience, Ms. Kelly has collaborated with hundreds of families to help
+          With over a decade of teaching experience, Miss Kelly has collaborated with hundreds of families to help
           children achieve English fluency. Her innovative teaching methods and dedication to student success have
           earned her recognition in the field of ESL education.
         </p>
@@ -219,7 +219,7 @@ export default function AboutPage() {
             ))
           }
         </ul>
-        <Button variant="secondary">View Ms. Kelly&apos;s Credentials</Button>
+        <Button variant="secondary">View Miss Kelly&apos;s Credentials</Button>
       </motion.div>
     </section>
   )

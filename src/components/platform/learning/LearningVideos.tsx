@@ -91,7 +91,7 @@ export default function LearningVideos({ videos }: LearningVideosProps) {
           Learning Videos
         </h1>
         <p className="text-muted-foreground mt-2">
-          Educational videos created by Ms. Kelly to support your child&apos;s learning journey
+          Educational videos created by Miss Kelly to support your child&apos;s learning journey
         </p>
       </motion.div>
 

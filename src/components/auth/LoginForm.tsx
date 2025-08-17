@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input'
 import { titleFont } from '@/config/fonts'
 import { noticeFailure, noticeSuccess } from '@/components/toast-notifications/ToastNotifications'
 import { motion } from 'framer-motion'
-import { BookOpen } from 'lucide-react'
+import Image from 'next/image'
 
 const loginSchema = z.object({
   email: z.string({
@@ -81,7 +81,12 @@ export const LoginForm = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-center mb-2">
-                <BookOpen className="h-10 w-10 text-primary" />
+                <Image
+                  src="/logo.webp"
+                  alt="Miss Kelly ESL Academy"
+                  width={100}
+                  height={0}
+                />
               </div>
               <CardTitle className={`${titleFont.className} text-2xl text-center`}>Welcome back</CardTitle>
               <CardDescription className="text-center">
