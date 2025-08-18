@@ -20,7 +20,7 @@ export default function Header() {
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       <div className="container flex flex-col md:h-16 items-center justify-between p-3 gap-2">
-        <div className="flex items-center justify-between w-full">
+        <div className="flex items-center justify-between w-full max-w-5xl">
           <Link href="/" className="flex items-center space-x-2">
             <Image
               src="/logo.webp"

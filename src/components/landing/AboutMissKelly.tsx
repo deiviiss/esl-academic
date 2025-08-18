@@ -23,7 +23,7 @@ export default function AboutMissKelly({ imageUrl }: AboutProps) {
 
   return (
     <section className="w-full py-24 md:py-24 lg:py-32 bg-secondary/10" id="about">
-      <div className="container px-4 md:px-6">
+      <div className="container px-4 md:px-6 max-w-6xl">
         <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
           <motion.div
             className="relative w-full aspect-square rounded-lg overflow-hidden"
