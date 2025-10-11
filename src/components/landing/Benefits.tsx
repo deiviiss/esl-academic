@@ -8,17 +8,17 @@ const benefits = [
   {
     title: "Simple, 3-Step Process",
     description: "No matter their age or ability, all kids learn English the same way.",
-    image: "/imgs/1.png",
+    image: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185487/1_yfzif3.jpg",
   },
   {
     title: "Quick Skill-Building",
     description: "It takes just 5 minutes a day of your focused attention.",
-    image: "/imgs/2.png",
+    image: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185488/2_yayoa0.jpg",
   },
   {
     title: "Play-Based Approach",
     description: "You can use your child's interests to keep them excited to learn.",
-    image: "/imgs/3.png",
+    image: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185488/3_bcnx8m.jpg",
   },
 ]
 
