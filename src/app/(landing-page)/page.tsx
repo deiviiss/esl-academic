@@ -8,7 +8,7 @@ import Hero from "@/components/landing/Hero"
 
 export default function LandingPage() {
   const heroVideoUrl = "https://res.cloudinary.com/dhyds3mnm/video/upload/v1740683423/Video_ESL_sdvzls.mp4"
-  const imageUrl = "/imgs/24.png"
+  const imageUrl = "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185056/24_j42gma.jpg"
 
   return (
     <>

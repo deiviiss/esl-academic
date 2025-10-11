@@ -12,12 +12,12 @@ const getLearningVideos = () => {
   return [
     {
       id: "vid_01",
-      title: "Colors - April",
+      title: "Fruis - October",
       level: "Nursery",
       month: "2024-04-01",
-      url: "https://res.cloudinary.com/dhyds3mnm/video/upload/v1740683423/Video_ESL_sdvzls.mp4",
-      thumbnail: "/imgs/placeholder.jpg?height=180&width=320",
-      description: "Vocabulary and pronunciation practice for colors.",
+      url: "https://res.cloudinary.com/dhyds3mnm/video/upload/v1760187910/WhatsApp_Video_2025-10-09_at_06.43.53_80911e09_m7pinc.mp4",
+      thumbnail: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185488/3_bcnx8m.jpg",
+      description: "Vocabulary and pronunciation practice for fruits.",
       type: "learning",
     },
     {
