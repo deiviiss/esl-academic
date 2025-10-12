@@ -16,7 +16,7 @@ export default async function AuthLayout({
   return (
     <>
       <Header />
-      <div className='container py-10'>
+      <div className='container px-2 pb-10'>
         {children}
       </div>
     </>

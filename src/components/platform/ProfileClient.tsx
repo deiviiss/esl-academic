@@ -231,7 +231,7 @@ export const ProfileClient = ({ user }: profileProps) => {
         animate: { transition: { staggerChildren: 0.1 } },
       }}
     >
-      <motion.div variants={fadeInUp} className="flex items-center gap-4 justify-between mb-8">
+      <motion.div variants={fadeInUp} className="flex items-center gap-4 justify-between mb-8 pt-8">
         <div>
           <h1 className="text-3xl font-bold text-primary">My Profile</h1>
           <p className="text-muted-foreground">Manage your account settings and subscription</p>
