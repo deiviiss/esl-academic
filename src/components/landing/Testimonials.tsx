@@ -45,7 +45,7 @@ export default function Testimonials() {
             </h2>
           </div>
         </motion.div>
-        <div className="mx-auto max-w-3xl py-12">
+        <div className="mx-auto max-w-5xl py-12">
           <Carousel
             plugins={[plugin.current]}
             className="w-full"

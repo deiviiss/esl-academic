@@ -20,7 +20,7 @@ export default function LearningProcess() {
               </p>
             </div>
           </div>
-          <div className="mx-auto grid max-w-5xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
+          <div className="mx-auto grid max-w-7xl items-center gap-6 py-12 lg:grid-cols-3 lg:gap-12">
             <div className="flex flex-col items-center space-y-4">
               <div className="flex h-16 w-16 items-center justify-center rounded-full bg-secondary">
                 <span className="text-2xl font-bold text-white">1</span>

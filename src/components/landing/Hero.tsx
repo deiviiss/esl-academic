@@ -12,7 +12,7 @@ interface HeroProps {
 export default function Hero({ videoUrl }: HeroProps) {
   return (
     <section className="relative flex items-start justify-center overflow-hidden pt-12 pb-24 md:py-12 lg:py-8 bg-secondary/10">
-      <div className="px-4 md:px-6 max-w-6xl">
+      <div className="px-4 md:px-6 max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
           <motion.div
             className="flex flex-col justify-center space-y-4"
