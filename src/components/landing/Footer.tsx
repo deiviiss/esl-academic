@@ -12,7 +12,7 @@ export default function Footer() {
           </Link>
           <p className="text-sm text-muted-foreground">Inspiring confident English speakers</p>
         </div>
-        <div className="flex space-x-4">
+        <div className="flex space-x-4 text-sm">
           <Link href="#" className="text-muted-foreground hover:text-primary">
             Terms
           </Link>

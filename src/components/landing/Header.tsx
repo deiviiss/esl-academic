@@ -12,6 +12,13 @@ export default function Header() {
   const isAuthenticated = !!session?.user
   const isAdmin = session?.user?.role === 'admin'
 
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(`${sectionId}`)
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
   return (
     <motion.header
       className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60"
@@ -19,25 +26,33 @@ export default function Header() {
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
-      <div className="container flex flex-col md:h-16 items-center justify-between p-3 gap-2">
-        <div className="flex items-center justify-between w-full max-w-5xl">
+      <div className="container flex flex-col md:h-16 lg:h-20 items-center justify-between p-3 gap-2">
+        <div className="flex items-center md:h-full justify-between w-full max-w-5xl">
           <Link href="/" className="flex items-center space-x-2">
             <Image
               src="/logo.webp"
               alt="Miss Kelly ESL Academy"
-              width={100}
+              width={110}
               height={0}
             />
           </Link>
           <nav className="hidden md:flex gap-6">
-            {["About", "Our Method", "Testimonials", "Contact"].map((item) => (
-              <Link key={item} href={`/#${item.toLowerCase().replace(" ", "-")}`}>
+            {[
+              { label: "Why Choose Us", href: "#why-choose-us" },
+              { label: "Our Method", href: "#our-method" },
+              { label: "Parents Love Us", href: "#why-parents-love" },
+              { label: "What They Learn", href: "#what-child-learns" },
+              { label: "Programs", href: "#services" },
+              { label: "Contact", href: "#contact" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href}>
                 <motion.span
                   className="text-sm font-medium text-muted-foreground hover:text-primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={() => scrollToSection(item.href.split("#")[1])}
                 >
-                  {item}
+                  {item.label}
                 </motion.span>
               </Link>
             ))}
@@ -72,14 +87,20 @@ export default function Header() {
           </div>
         </div>
         <nav className="flex md:hidden gap-6">
-          {["About", "Our Method", "Testimonials", "Contact"].map((item) => (
-            <Link key={item} href={`/#${item.toLowerCase().replace(" ", "-")}`}>
+          {[
+            { label: "Our Method", href: "/#our-method" },
+            { label: "Programs", href: "/#services" },
+            { label: "About", href: "/#about" },
+            { label: "Contact", href: "/#contact" },
+          ].map((item) => (
+            <Link key={item.label} href={item.href}>
               <motion.span
                 className="text-sm font-medium text-muted-foreground hover:text-primary"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => scrollToSection(item.href.split("#")[1])}
               >
-                {item}
+                {item.label}
               </motion.span>
             </Link>
           ))}

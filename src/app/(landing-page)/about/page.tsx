@@ -41,7 +41,7 @@ const experiences = [
 
 export default function AboutPage() {
   return (
-    <section className="container mx-auto px-4 py-8 max-w-5xl">
+    <section className="container mx-auto px-4 py-8 max-w-7xl">
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}

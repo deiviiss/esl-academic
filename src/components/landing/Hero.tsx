@@ -12,7 +12,7 @@ interface HeroProps {
 export default function Hero({ videoUrl }: HeroProps) {
   return (
     <section className="relative flex items-start justify-center overflow-hidden pt-12 pb-24 md:py-12 lg:py-8 bg-secondary/10">
-      <div className="px-4 md:px-6 max-w-6xl">
+      <div className="px-4 md:px-6 max-w-7xl">
         <div className="grid gap-12 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
           <motion.div
             className="flex flex-col justify-center space-y-4"
@@ -26,15 +26,11 @@ export default function Hero({ videoUrl }: HeroProps) {
                 Learn English the Natural Way
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                At Miss Kelly ESL academy, our mission is to inspire young learners to become confident English speakers
-                through engaging lessons and a supportive environment.
+                A joyful, meaningful, and empowering English experience for Spanish-speaking children ages 2.8 to 12 — combining play-based learning, phonics, and personalized attention.
               </p>
             </div>
             <div className="flex flex-col gap-5 sm:gap-3 min-[400px]:flex-row">
               <Button size="lg">Start Learning Today</Button>
-              <Button variant="outline" size="lg">
-                Watch Demo
-              </Button>
             </div>
           </motion.div>
           <motion.div
