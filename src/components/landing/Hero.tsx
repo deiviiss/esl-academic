@@ -26,15 +26,11 @@ export default function Hero({ videoUrl }: HeroProps) {
                 Learn English the Natural Way
               </h1>
               <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                At Miss Kelly ESL academy, our mission is to inspire young learners to become confident English speakers
-                through engaging lessons and a supportive environment.
+                A joyful, meaningful, and empowering English experience for Spanish-speaking children ages 2.8 to 12 — combining play-based learning, phonics, and personalized attention.
               </p>
             </div>
             <div className="flex flex-col gap-5 sm:gap-3 min-[400px]:flex-row">
               <Button size="lg">Start Learning Today</Button>
-              <Button variant="outline" size="lg">
-                Watch Demo
-              </Button>
             </div>
           </motion.div>
           <motion.div

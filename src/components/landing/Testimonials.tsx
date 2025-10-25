@@ -31,7 +31,7 @@ export default function Testimonials() {
   )
 
   return (
-    <section className="w-full pt-24 pb-12 md:py-24 lg:py-32 bg-secondary/10" id='testimonials'>
+    <section className="w-full pt-20 pb-12 md:py-24 lg:py-32 bg-secondary/10" id='testimonials'>
       <div className="container px-4 md:px-6">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center"

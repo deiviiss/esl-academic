@@ -6,25 +6,28 @@ import { titleFont } from "@/config/fonts"
 
 const benefits = [
   {
-    title: "English That Feels Natural Through Play",
-    description: "Children learn best when they’re having fun. Our play-based approach makes English feel like a natural part of your child’s world—through songs, games, stories, and hands-on activities. Your child gains confidence, vocabulary, and communication skills in English—without stress or pressure.",
+    title: "Simple, 3-Step Process",
+    description:
+      "Children learn English naturally through play, phonics, and joyful engagement — just like they learned their first language.",
     image: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185487/1_yfzif3.jpg",
   },
   {
-    title: "Phonics-Based Learning for Strong Reading and Speaking Skills",
-    description: "We don’t just teach words—we teach how English works. Our phonics-based method helps children connect sounds with letters, leading to clearer pronunciation and stronger reading skills. Your child builds a solid foundation in English, setting them up for long-term academic success.",
+    title: "Quick Skill-Building",
+    description:
+      "With just a few minutes of focused, playful practice each day, your child gains confidence, vocabulary, and real communication skills.",
     image: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185488/2_yayoa0.jpg",
   },
   {
-    title: "Small Groups and Personalized Attention",
-    description: "We keep our groups small to ensure every child gets the attention they deserve. Lessons are tailored to each child’s age and level, from toddlers just starting to talk to older kids learning to read and write in English. Your child feels seen, supported, and encouraged—every step of the way.",
+    title: "Play-Based Approach",
+    description:
+      "Our lessons are filled with movement, laughter, and connection — turning learning English into an experience they love.",
     image: "https://res.cloudinary.com/dhyds3mnm/image/upload/v1760185488/3_bcnx8m.jpg",
   },
 ]
 
-export default function Benefits() {
+export default function WhyChooseUs() {
   return (
-    <section className="w-full py-24 md:py-24 lg:py-32">
+    <section className="w-full pt-20 md:py-24 xl:py-32" id="why-choose-us">
       <div className="container px-4 md:px-6">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center"
@@ -35,7 +38,7 @@ export default function Benefits() {
           <div className="space-y-2">
             <h2 className={`${titleFont.className} text-3xl font-bold tracking-tighter sm:text-5xl text-primary`}>Why Choose Us?</h2>
             <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-              Our proven method makes learning English natural and enjoyable
+              Our program helps children fall in love with English through play, phonics, and personalized attention.
             </p>
           </div>
         </motion.div>
