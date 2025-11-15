@@ -1,7 +1,7 @@
 
 import AboutMissKelly from "@/components/landing/AboutMissKelly"
 import WhyChooseUs from "@/components/landing/WhyChooseUs"
-import Testimonials from "@/components/landing/Testimonials"
+import GoogleReviews from "@/components/landing/GoogleReviews"
 import CTA from "@/components/landing/CTA"
 import Workshop from "@/components/landing/Workshop"
 import LearningProcess from "@/components/landing/LearningProcess"
@@ -23,7 +23,7 @@ export default function LandingPage() {
       <WhatChildLearns />
       <AboutMissKelly imageUrl={imageUrl} />
       <Services />
-      <Testimonials />
+      <GoogleReviews />
       <CTA />
       <Workshop />
     </>
