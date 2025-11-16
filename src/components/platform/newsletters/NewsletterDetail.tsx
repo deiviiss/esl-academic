@@ -188,7 +188,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
               </Button>
 
               <Button variant="secondary" className="w-full" asChild>
-                <Link href="/platform/newsletters">
+                <Link href="/platform/academy/newsletters">
                   <Calendar className="h-4 w-4 mr-2" />
                   All Newsletters
                 </Link>

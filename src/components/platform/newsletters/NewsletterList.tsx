@@ -101,7 +101,7 @@ export default function NewsletterList({ newslettersByLevel }: NewsletterListPro
                       </CardContent>
                       <CardFooter>
                         <Button className="w-full" asChild>
-                          <Link href={`/platform/newsletters/${newsletter.id}`}>
+                          <Link href={`/platform/academy/newsletters/${newsletter.id}`}>
                             View Details
                             <ChevronRight className="h-4 w-4 ml-2" />
                           </Link>
