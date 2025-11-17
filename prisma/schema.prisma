@@ -12,6 +12,12 @@ enum Role {
   user
 }
 
+enum Level {
+  toddlers
+  nursery
+  prek
+}
+
 model User {
   id                  String  @id @default(uuid())
   name                String
@@ -20,15 +26,16 @@ model User {
   emailVerified       Boolean @default(false)
   phoneNumber         String
   phoneNumberVerified Boolean @default(false)
-  hasPurchasedOnce    Boolean @default(false)
   image               String?
   role                Role    @default(user)
   isActive            Boolean @default(true)
+  level               Level?
 
   address UserAddress?
 
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
+  createdAt DateTime   @default(now())
+  updatedAt DateTime?  @updatedAt
+  Purchase  Purchase[]
 
   @@map("users")
 }
@@ -58,4 +65,30 @@ model UserAddress {
   userId String @unique
 
   @@map("user_addresses")
+}
+
+model Product {
+  id       String  @id @default(uuid())
+  name     String
+  type     String  @unique // "academy" | "course" | others later
+  price    Int
+  isActive Boolean @default(true)
+
+  purchases Purchase[]
+
+  @@map("products")
+}
+
+model Purchase {
+  id     String @id @default(uuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@map("purchases")
 }

@@ -26,10 +26,13 @@ interface LearningVideo {
 
 interface LearningVideosProps {
   videos: LearningVideo[]
+  allowedLevels: string[]
+  isAdmin: boolean
 }
 
-export default function LearningVideos({ videos }: LearningVideosProps) {
-  const [activeLevel, setActiveLevel] = useState("all")
+export default function LearningVideos({ videos, allowedLevels, isAdmin }: LearningVideosProps) {
+  const availableLevels = isAdmin ? ["all", ...allowedLevels] : allowedLevels
+  const [activeLevel, setActiveLevel] = useState(availableLevels[0] || "all")
   const [selectedMonth, setSelectedMonth] = useState("all")
   const [filteredVideos, setFilteredVideos] = useState<LearningVideo[]>(videos)
   const [selectedVideo, setSelectedVideo] = useState<LearningVideo | null>(null)
@@ -45,7 +48,7 @@ export default function LearningVideos({ videos }: LearningVideosProps) {
     let filtered = videos
 
     if (activeLevel !== "all") {
-      filtered = filtered.filter((video) => video.level === activeLevel)
+      filtered = filtered.filter((video) => video.level.toLowerCase() === activeLevel.toLowerCase())
     }
 
     if (selectedMonth !== "all") {
@@ -97,24 +100,14 @@ export default function LearningVideos({ videos }: LearningVideosProps) {
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate" className="mb-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <Tabs value={activeLevel} onValueChange={setActiveLevel} className="w-full md:w-auto">
-            <TabsList className="grid grid-cols-4 w-full md:w-auto">
-              <TabsTrigger value="all" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>All</span>
-              </TabsTrigger>
-              <TabsTrigger value="Toddlers" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>Toddlers</span>
-              </TabsTrigger>
-              <TabsTrigger value="Nursery" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>Nursery</span>
-              </TabsTrigger>
-              <TabsTrigger value="PreK" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>PreK</span>
-              </TabsTrigger>
+          <Tabs value={activeLevel} onValueChange={setActiveLevel} className="w-full">
+            <TabsList className={`grid w-full max-w-md grid-cols-${availableLevels.length}`}>
+              {availableLevels.map((level) => (
+                <TabsTrigger key={level} value={level} className="flex items-center justify-center">
+                  <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
+                  <span>{level === "all" ? "All" : level === "prek" ? "Pre-K" : level.charAt(0).toUpperCase() + level.slice(1)}</span>
+                </TabsTrigger>
+              ))}
             </TabsList>
           </Tabs>
 

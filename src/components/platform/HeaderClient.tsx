@@ -7,7 +7,12 @@ import { ToogleDarkMode } from '../dark-mode/toogle-dark-mode/toogle-dark-mode'
 import { usePathname } from 'next/navigation'
 import Image from "next/image"
 
-export default function Header() {
+interface HeaderClientProps {
+  hasAcademy: boolean
+  hasCourse: boolean
+}
+
+export default function HeaderClient({ hasAcademy, hasCourse }: HeaderClientProps) {
   const path = usePathname()
   const isProfilePage = path.includes('/platform/profile')
 
@@ -30,17 +35,32 @@ export default function Header() {
           </Link>
 
           <nav className="hidden md:flex gap-6">
-            {["Newsletters", "Learning", "Moments"].map((item) => (
-              <Link key={item} href={`/platform/${item.toLowerCase().replace(" ", "-")}`}>
+            {hasAcademy && (
+              <>
+                {["Newsletters", "Learning", "Moments"].map((item) => (
+                  <Link key={item} href={`/platform/academy/${item.toLowerCase().replace(" ", "-")}`}>
+                    <motion.span
+                      className="text-sm font-medium text-muted-foreground hover:text-primary"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {item}
+                    </motion.span>
+                  </Link>
+                ))}
+              </>
+            )}
+            {hasCourse && (
+              <Link href="/platform/course">
                 <motion.span
                   className="text-sm font-medium text-muted-foreground hover:text-primary"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {item}
+                  My Courses
                 </motion.span>
               </Link>
-            ))}
+            )}
           </nav>
           <div className='flex items-center gap-3'>
             < ToogleDarkMode />
@@ -61,20 +81,34 @@ export default function Header() {
           </div>
         </div>
         <nav className="flex md:hidden gap-6">
-          {["Newsletters", "Learning", "Moments"].map((item) => (
-            <Link key={item} href={`/platform/${item.toLowerCase().replace(" ", "-")}`}>
+          {hasAcademy && (
+            <>
+              {["Newsletters", "Learning", "Moments"].map((item) => (
+                <Link key={item} href={`/platform/academy/${item.toLowerCase().replace(" ", "-")}`}>
+                  <motion.span
+                    className="text-sm font-medium text-muted-foreground hover:text-primary"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {item}
+                  </motion.span>
+                </Link>
+              ))}
+            </>
+          )}
+          {hasCourse && (
+            <Link href="/platform/course">
               <motion.span
                 className="text-sm font-medium text-muted-foreground hover:text-primary"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {item}
+                My Courses
               </motion.span>
             </Link>
-          ))}
+          )}
         </nav>
       </div>
     </motion.header>
   )
 }
-

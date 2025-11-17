@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation'
-import Header from '@/components/platform/Header'
+import HeaderServer from '@/components/platform/HeaderServer'
 import { getUserSessionServer } from '@/actions/auth/getUserSessionServer'
 
 export default async function AuthLayout({
@@ -15,7 +15,7 @@ export default async function AuthLayout({
 
   return (
     <>
-      <Header />
+      <HeaderServer />
       <div className='container px-2 pb-10'>
         {children}
       </div>
