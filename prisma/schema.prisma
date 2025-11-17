@@ -12,6 +12,12 @@ enum Role {
   user
 }
 
+enum Level {
+  toddlers
+  nursery
+  prek
+}
+
 model User {
   id                  String  @id @default(uuid())
   name                String
@@ -20,10 +26,10 @@ model User {
   emailVerified       Boolean @default(false)
   phoneNumber         String
   phoneNumberVerified Boolean @default(false)
-  hasPurchasedOnce    Boolean @default(false)
   image               String?
   role                Role    @default(user)
   isActive            Boolean @default(true)
+  level               Level?
 
   address UserAddress?
 

@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { titleFont } from '@/config/fonts'
 import { type User } from '@/interfaces/users/user.interface'
 import { noticeFailure, noticeSuccess } from '@/components/toast-notifications/ToastNotifications'
@@ -33,7 +34,8 @@ const formUserSchema = z.object({
     .string()
     .refine(value => value === '' || (value.length >= 6 && value.length <= 10), {
       message: 'The password must be between 6 and 10 characters if it will be changed'
-    })
+    }),
+  level: z.enum(["toddlers", "nursery", "prek"]).optional()
 })
 
 interface Props {
@@ -50,7 +52,8 @@ export const UserForm = ({ user }: Props) => {
     name: user.name,
     email: user.email,
     phoneNumber: user.phoneNumber,
-    password: ''
+    password: '',
+    level: user.level as "toddlers" | "nursery" | "prek" | undefined
   }
 
   const form = useForm<z.infer<typeof formUserSchema>>({
@@ -61,7 +64,7 @@ export const UserForm = ({ user }: Props) => {
   const onSubmit = async (values: z.infer<typeof formUserSchema>) => {
     setIsSubmitting(true)
 
-    const { ok, message } = await updateUser({ ...values })
+    const { ok, message } = await updateUser({ ...values, level: values.level })
     if (!ok) {
       noticeFailure(message)
 
@@ -167,6 +170,32 @@ export const UserForm = ({ user }: Props) => {
                     </FormControl>
                     <FormDescription>
                       If you want to change your password, please enter a new one. Otherwise, leave it blank.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="level"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Level</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="toddlers">Toddlers</SelectItem>
+                        <SelectItem value="nursery">Nursery</SelectItem>
+                        <SelectItem value="prek">Pre-K</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Assign the academic level for this user.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

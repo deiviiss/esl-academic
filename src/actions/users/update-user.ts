@@ -4,6 +4,7 @@ import bcrypt from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
+import { Level } from '@prisma/client'
 
 const userSchema = z.object({
   id: z
@@ -25,7 +26,11 @@ const userSchema = z.object({
     .optional()
     .refine(value => !value || (value.length >= 6 && value.length <= 10), {
       message: 'The password must be between 6 and 10 characters if provided'
-    })
+    }),
+  level: z
+    .enum(["toddlers", "nursery", "prek"])
+    .transform((val) => val as Level)
+    .optional()
 })
 
 interface IData {
@@ -34,6 +39,7 @@ interface IData {
   email: string
   phoneNumber: string
   password?: string | null
+  level?: Level
 }
 
 export const updateUser = async (data: IData) => {
@@ -47,17 +53,22 @@ export const updateUser = async (data: IData) => {
       }
     }
 
-    const { name, email, password, id, phoneNumber } = userParsed.data
+    const { name, email, password, id, phoneNumber, level } = userParsed.data
 
     const dataUserUpdated: {
       name: string
       email: string
       phoneNumber: string
       password?: string
+      level?: Level | null
     } = {
       name,
       email,
       phoneNumber
+    }
+
+    if (level !== undefined) {
+      dataUserUpdated.level = level
     }
 
     if (password && password.length > 0) {

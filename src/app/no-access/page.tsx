@@ -15,7 +15,7 @@ export default function NoAccessPage() {
             Access Restricted
           </CardTitle>
           <CardDescription className="text-gray-600">
-            You don't have access to this content yet.
+            You don&apos;t have access to this content yet.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

@@ -1,28 +1,20 @@
 import { redirect } from 'next/navigation'
 import { getUserSessionServer } from '@/actions/auth/getUserSessionServer'
-import { hasAccess } from '@/lib/access'
+import { userHasCourse } from '@/lib/access'
 
 export default async function CourseLayout({
   children
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const userSession = await getUserSessionServer()
+  const session = await getUserSessionServer()
+  if (!session) return redirect("/")
+  const userId = session.id
 
-  if (!userSession) {
-    redirect('/')
+  const hasCourse = await userHasCourse(userId)
+  if (!hasCourse && session.role !== "admin") {
+    return redirect("/no-access")
   }
 
-  // Verificar acceso a curso
-  const hasCourseAccess = await hasAccess(userSession.id, 'course')
-
-  if (!hasCourseAccess) {
-    redirect('/no-access')
-  }
-
-  return (
-    <>
-      {children}
-    </>
-  )
+  return <>{children}</>
 }

@@ -1,4 +1,7 @@
 import NewsletterList from "@/components/platform/newsletters/NewsletterList"
+import { getUserSessionServer } from "@/actions/auth/getUserSessionServer"
+import { userHasAcademy } from "@/lib/access"
+import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
@@ -31,8 +34,19 @@ const getNewslettersByLevel = () => {
   }
 }
 
-export default function NewslettersPage() {
+export default async function NewslettersPage() {
+  const session = await getUserSessionServer()
+  if (!session) redirect("/")
+
+  const userId = session.id
+  const isAdmin = session.role === "admin"
+
+  const hasAcademy = await userHasAcademy(userId)
+  if (!hasAcademy && !isAdmin) redirect("/no-access")
+
+  const allowedLevels = isAdmin ? ["toddlers", "nursery", "prek"] : ((session).level ? [(session).level] : [])
+
   const newslettersByLevel = getNewslettersByLevel()
 
-  return <NewsletterList newslettersByLevel={newslettersByLevel} />
+  return <NewsletterList newslettersByLevel={newslettersByLevel} allowedLevels={allowedLevels} />
 }

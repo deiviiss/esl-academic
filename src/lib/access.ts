@@ -8,7 +8,7 @@ export type ProductType = 'academy' | 'course'
  * @param productType - Tipo de producto ('academy' | 'course')
  * @returns boolean - true si tiene acceso, false si no
  */
-export const hasAccess = async (userId: string, productType: ProductType): Promise<boolean> => {
+export const userHasProduct = async (userId: string, productType: ProductType): Promise<boolean> => {
   try {
     // Buscar si el usuario tiene una compra del producto especificado
     const purchase = await prisma.purchase.findFirst({
@@ -26,6 +26,14 @@ export const hasAccess = async (userId: string, productType: ProductType): Promi
     console.error('Error checking access:', error)
     return false
   }
+}
+
+export async function userHasAcademy(userId: string) {
+  return userHasProduct(userId, "academy")
+}
+
+export async function userHasCourse(userId: string) {
+  return userHasProduct(userId, "course")
 }
 
 /**

@@ -5,10 +5,10 @@ export interface User {
   emailVerified: boolean | null
   phoneNumber: string
   phoneNumberVerified: boolean | null
-  hasPurchasedOnce: boolean
   isActive: boolean
   image?: string | null
   role: string
+  level?: string | null
   password: string
   avatarUrl?: string;
   subscriptionPlan?: {

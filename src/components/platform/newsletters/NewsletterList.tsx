@@ -23,10 +23,11 @@ interface NewslettersByLevel {
 
 interface NewsletterListProps {
   newslettersByLevel: NewslettersByLevel
+  allowedLevels: string[]
 }
 
-export default function NewsletterList({ newslettersByLevel }: NewsletterListProps) {
-  const [activeLevel, setActiveLevel] = useState("toddlers")
+export default function NewsletterList({ newslettersByLevel, allowedLevels }: NewsletterListProps) {
+  const [activeLevel, setActiveLevel] = useState(allowedLevels[0] || "toddlers")
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -60,23 +61,17 @@ export default function NewsletterList({ newslettersByLevel }: NewsletterListPro
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
         <Tabs value={activeLevel} onValueChange={setActiveLevel} className="w-full">
           <div className="flex justify-center mb-6">
-            <TabsList className="grid w-full max-w-md grid-cols-3">
-              <TabsTrigger value="toddlers" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>Toddlers</span>
-              </TabsTrigger>
-              <TabsTrigger value="nursery" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>Nursery</span>
-              </TabsTrigger>
-              <TabsTrigger value="prek" className="flex items-center justify-center">
-                <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                <span>Pre-K</span>
-              </TabsTrigger>
+            <TabsList className={`grid w-full max-w-md grid-cols-${allowedLevels.length}`}>
+              {allowedLevels.map((level) => (
+                <TabsTrigger key={level} value={level} className="flex items-center justify-center">
+                  <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
+                  <span>{level.charAt(0).toUpperCase() + level.slice(1)}</span>
+                </TabsTrigger>
+              ))}
             </TabsList>
           </div>
 
-          {Object.entries(newslettersByLevel).map(([level, newsletters]: [string, Newsletter[]]) => (
+          {Object.entries(newslettersByLevel).filter(([level]) => allowedLevels.includes(level)).map(([level, newsletters]: [string, Newsletter[]]) => (
             <TabsContent key={level} value={level}>
               <motion.div
                 className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"

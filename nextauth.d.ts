@@ -11,6 +11,7 @@ declare module 'next-auth' {
       phoneNumberVerified: boolean
       role: string
       image?: string
+      level?: 'toddlers' | 'nursery' | 'prek'
     } & DefaultSession['user']
   }
 }
