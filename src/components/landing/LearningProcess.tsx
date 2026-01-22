@@ -6,7 +6,7 @@ import { motion } from "framer-motion"
 export default function LearningProcess() {
   return (
     <section className="w-full pt-20 md:py-24 lg:py-32 bg-secondary/10 scroll-mt-10 md:scroll-mt-0" id="our-method">
-      <div className="container px-4 md:px-6">
+      <div className="container px-4 md:px-6 max-w-6xl mx-auto">
         <motion.div initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           {/* Header */}
           <div className="flex flex-col items-center justify-center space-y-4 text-center">

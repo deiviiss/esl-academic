@@ -50,7 +50,7 @@ export default function WhatChildLearns() {
         </motion.div>
 
         {/* Stages */}
-        <div className="mx-auto grid max-w-7xl items-start gap-8 py-12 lg:grid-cols-3 lg:gap-12">
+        <div className="mx-auto grid max-w-6xl items-start gap-8 py-12 lg:grid-cols-3 lg:gap-12">
           {stages.map((stage, index) => (
             <motion.div
               key={index}

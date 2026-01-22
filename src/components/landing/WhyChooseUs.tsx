@@ -28,7 +28,7 @@ const benefits = [
 export default function WhyChooseUs() {
   return (
     <section className="w-full pt-20 md:py-24 xl:py-32" id="why-choose-us">
-      <div className="container px-4 md:px-6">
+      <div className="container px-4 md:px-6 max-w-6xl mx-auto ">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center"
           initial={{ opacity: 0, y: 50 }}

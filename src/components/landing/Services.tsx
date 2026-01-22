@@ -25,7 +25,7 @@ export default function Services() {
 
   return (
     <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/10 scroll-mt-10 md:scroll-mt-0" id="services">
-      <div className="container px-4 md:px-6">
+      <div className="container px-4 md:px-6 max-w-6xl mx-auto">
         <motion.div
           className="flex flex-col items-center justify-center text-center space-y-4"
           initial={{ opacity: 0, y: 50 }}

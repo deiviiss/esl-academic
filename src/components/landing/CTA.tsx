@@ -10,7 +10,7 @@ export default function CTA() {
       className="w-full pt-20 py-12 mb-12 md:py-24 lg:py-32 bg-primary text-primary-foreground scroll-mt-10 md:scroll-mt-0"
       id="contact"
     >
-      <div className="container px-4 md:px-6">
+      <div className="container px-4 md:px-6 max-w-6xl mx-auto">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center"
           initial={{ opacity: 0, y: 50 }}
