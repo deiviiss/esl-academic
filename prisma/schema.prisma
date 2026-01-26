@@ -12,12 +12,6 @@ enum Role {
   user
 }
 
-enum Level {
-  toddlers
-  nursery
-  prek
-}
-
 model User {
   id                  String  @id @default(uuid())
   name                String
@@ -29,13 +23,13 @@ model User {
   image               String?
   role                Role    @default(user)
   isActive            Boolean @default(true)
-  level               Level?
 
   address UserAddress?
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime?  @updatedAt
-  Purchase  Purchase[]
+  createdAt DateTime      @default(now())
+  updatedAt DateTime?     @updatedAt
+  purchase  Purchase[]
+  children  ParentChild[]
 
   @@map("users")
 }
@@ -91,4 +85,95 @@ model Purchase {
 
   @@unique([userId, productId])
   @@map("purchases")
+}
+
+model ParentChild {
+  id      String @id @default(uuid())
+  userId  String
+  childId String
+  user    User   @relation(fields: [userId], references: [id])
+  child   Child  @relation(fields: [childId], references: [id])
+
+  @@unique([userId, childId])
+  @@map("parent_childs")
+}
+
+model Child {
+  id      String        @id @default(uuid())
+  name    String
+  levelId String
+  level   Level         @relation(fields: [levelId], references: [id])
+  parents ParentChild[]
+
+  @@map("childrens")
+}
+
+model Level {
+  id          String       @id @default(uuid())
+  name        String // Toddlers, Nursery, PreK, Elementary
+  newsletters Newsletter[]
+  children    Child[]
+
+  @@map("levels")
+}
+
+model Newsletter {
+  id          String   @id @default(uuid())
+  title       String // Newsletter title, e.g., "October 2024 Newsletter"
+  month       DateTime
+  year        Int
+  forParents  String
+  documentUrl String?
+  levels      Level[]
+
+  vocabularies Vocabulary[]
+  videos       Video[]
+  playlist     Playlist?
+
+  createdAt DateTime @default(now())
+
+  @@map("newsletters")
+}
+
+model Vocabulary {
+  id            String @id @default(uuid())
+  word          String
+  pronunciation String
+  imageUrl      String
+
+  newsletterId String
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+
+  @@map("vocabularies")
+}
+
+model Video {
+  id           String     @id @default(uuid())
+  newsletterId String
+  title        String
+  videoUrl     String
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+
+  @@map("videos")
+}
+
+model Playlist {
+  id           String         @id @default(uuid())
+  newsletterId String         @unique
+  title        String?
+  links        PlaylistLink[]
+
+  newsletter Newsletter @relation(fields: [newsletterId], references: [id])
+
+  @@map("playlists")
+}
+
+model PlaylistLink {
+  id         String   @id @default(uuid())
+  title      String?
+  url        String
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+
+  @@map("playlist_links")
 }
