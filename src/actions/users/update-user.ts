@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs'
 import { revalidatePath } from 'next/cache'
 import { z } from 'zod'
 import prisma from '@/lib/prisma'
-import { Level } from '@prisma/client'
+import { Role } from '@prisma/client'
 
 const userSchema = z.object({
   id: z
@@ -27,9 +27,15 @@ const userSchema = z.object({
     .refine(value => !value || (value.length >= 6 && value.length <= 10), {
       message: 'The password must be between 6 and 10 characters if provided'
     }),
-  level: z
-    .enum(["toddlers", "nursery", "prek"])
-    .transform((val) => val as Level)
+  role: z
+    .nativeEnum(Role)
+    .optional(),
+  isActive: z
+    .boolean()
+    .optional(),
+  image: z
+    .string()
+    .nullable()
     .optional()
 })
 
@@ -39,7 +45,9 @@ interface IData {
   email: string
   phoneNumber: string
   password?: string | null
-  level?: Level
+  role?: Role
+  isActive?: boolean
+  image?: string | null
 }
 
 export const updateUser = async (data: IData) => {
@@ -53,22 +61,32 @@ export const updateUser = async (data: IData) => {
       }
     }
 
-    const { name, email, password, id, phoneNumber, level } = userParsed.data
+    const { name, email, password, id, phoneNumber, role, isActive, image } = userParsed.data
 
     const dataUserUpdated: {
       name: string
       email: string
       phoneNumber: string
       password?: string
-      level?: Level | null
+      role?: Role
+      isActive?: boolean
+      image?: string | null
     } = {
       name,
       email,
       phoneNumber
     }
 
-    if (level !== undefined) {
-      dataUserUpdated.level = level
+    if (role !== undefined) {
+      dataUserUpdated.role = role
+    }
+
+    if (isActive !== undefined) {
+      dataUserUpdated.isActive = isActive
+    }
+
+    if (image !== undefined) {
+      dataUserUpdated.image = image
     }
 
     if (password && password.length > 0) {

@@ -15,16 +15,16 @@ import { Button } from "@/components/ui/button"
 import { ChildSummary } from "@/interfaces/child.interface"
 
 interface ChildSelectorProps {
-  children: ChildSummary[]
+  childrenList: ChildSummary[]
   selectedChildId: string
 }
 
-export function ChildSelector({ children, selectedChildId }: ChildSelectorProps) {
+export function ChildSelector({ childrenList, selectedChildId }: ChildSelectorProps) {
   const router = useRouter()
   const [isExpanded, setIsExpanded] = useState(true)
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const selectedChild = children.find(c => c.id === selectedChildId) || children[0]
+  const selectedChild = childrenList.find(c => c.id === selectedChildId) || childrenList[0]
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -94,7 +94,7 @@ export function ChildSelector({ children, selectedChildId }: ChildSelectorProps)
                 <SelectValue placeholder="Selection a student" />
               </SelectTrigger>
               <SelectContent className="rounded-xl border-white/20 backdrop-blur-lg">
-                {children.map((child) => (
+                {childrenList.map((child) => (
                   <SelectItem key={child.id} value={child.id} className="focus:bg-primary/10 rounded-lg cursor-pointer">
                     <span className="font-medium text-foreground">{child.name}</span>
                     <span className="ml-2 text-xs text-muted-foreground">({child.level.name})</span>

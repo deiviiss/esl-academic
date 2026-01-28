@@ -8,11 +8,10 @@ import { usePathname } from 'next/navigation'
 import Image from "next/image"
 
 interface HeaderClientProps {
-  hasAcademy: boolean
   hasCourse: boolean
 }
 
-export default function HeaderClient({ hasAcademy, hasCourse }: HeaderClientProps) {
+export default function HeaderClient({ hasCourse }: HeaderClientProps) {
   const path = usePathname()
   const isProfilePage = path.includes('/platform/profile')
 

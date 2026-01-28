@@ -34,9 +34,9 @@ export default async function NewslettersPage({
     return <NewsletterList newsletters={newsletters} />
   }
 
-  const children = await getUserChildren(userId)
+  const userChildren = await getUserChildren(userId)
 
-  if (children.length === 0) {
+  if (userChildren.length === 0) {
     return (
       <div className="container py-12 text-center">
         <h1 className="text-2xl font-bold mb-4 text-primary">No enrollments found</h1>
@@ -46,15 +46,15 @@ export default async function NewslettersPage({
   }
 
   const selectedChild = childId
-    ? (children).find((c) => c.id === childId) || children[0]
-    : children[0]
+    ? (userChildren).find((c) => c.id === childId) || userChildren[0]
+    : userChildren[0]
 
   const newsletters = await getNewslettersByLevel((selectedChild).levelId)
 
   return (
     <>
-      {children.length > 1 && (
-        <ChildSelector children={children} selectedChildId={(selectedChild).id} />
+      {userChildren.length > 1 && (
+        <ChildSelector childrenList={userChildren} selectedChildId={(selectedChild).id} />
       )}
       <NewsletterList newsletters={newsletters} selectedChild={selectedChild} />
     </>

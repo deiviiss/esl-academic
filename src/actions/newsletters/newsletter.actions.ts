@@ -1,8 +1,5 @@
 'use server'
 
-import prisma from '@/lib/prisma'
-
-
 const mockLevels = [
   {
     id: 'level-1',

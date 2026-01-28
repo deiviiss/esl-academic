@@ -157,7 +157,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                                 {/* Thumbnail with object-cover to provide the "cut" effect */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
 
-                                <img
+                                <Image
                                   src={video.thumbnailUrl || "/imgs/placeholder.jpg"}
                                   alt={video.title}
                                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"

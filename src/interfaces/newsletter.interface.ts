@@ -49,18 +49,3 @@ export interface NewsletterDetailData {
   playlist?: PlaylistData;
   forParents: ForParentsData[];
 }
-
-interface Newsletter {
-  id: string
-  title: string
-  month: Date | string
-  year: number;
-  forParents: ForParentsData[];
-  vocabularies: { id: string; word: string; pronunciation: string; imageUrl: string }[]
-  videos: { id: string; title: string; videoUrl: string; thumbnailUrl?: string | null }[]
-  playlist?: {
-    id: string
-    title?: string | null
-    links: { id: string; title?: string | null; url: string }[]
-  } | null
-}

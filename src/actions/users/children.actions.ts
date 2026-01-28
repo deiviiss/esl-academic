@@ -1,7 +1,5 @@
 'use server'
 
-import prisma from '@/lib/prisma'
-
 /**
  * Fetches all children associated with a specific user.
  */
@@ -25,7 +23,7 @@ export const getUserChildren = async (userId: string) => {
     // 🟢 MOCK DATA
     return [
       {
-        id: 'child-1',
+        id: userId,
         name: 'Armin',
         levelId: 'level-1',
         level: {

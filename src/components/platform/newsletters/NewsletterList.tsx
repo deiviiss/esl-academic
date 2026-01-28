@@ -1,12 +1,10 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
 import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, ChevronRight, GraduationCap, Newspaper } from "lucide-react"
+import { Calendar, ChevronRight, Newspaper } from "lucide-react"
 import Link from "next/link"
 import { ChildSummary } from "@/interfaces/child.interface"
 import { NewsletterListItem } from "@/interfaces/newsletter.interface"
