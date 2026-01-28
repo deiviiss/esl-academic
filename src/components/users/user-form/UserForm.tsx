@@ -12,7 +12,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { titleFont } from '@/config/fonts'
-import { type User } from '@/interfaces/users/user.interface'
+import { type User } from '@/interfaces/user.interface'
 import { noticeFailure, noticeSuccess } from '@/components/toast-notifications/ToastNotifications'
 
 const formUserSchema = z.object({

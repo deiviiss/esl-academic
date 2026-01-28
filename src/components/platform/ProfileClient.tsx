@@ -11,7 +11,7 @@ import { Bell, BookOpen, CreditCard, Loader, Settings, Upload, User as UserIcon,
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { Input } from "@/components/ui/input"
-import { type User } from "@/interfaces/users/user.interface"
+import { type User } from "@/interfaces/user.interface"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"

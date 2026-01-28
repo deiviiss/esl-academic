@@ -118,13 +118,13 @@ model Level {
 }
 
 model Newsletter {
-  id          String   @id @default(uuid())
-  title       String // Newsletter title, e.g., "October 2024 Newsletter"
-  month       DateTime
-  year        Int
-  forParents  String
-  documentUrl String?
-  levels      Level[]
+  id    String   @id @default(uuid())
+  title String // Newsletter title, e.g., "October 2024 Newsletter"
+  month DateTime
+  year  Int
+
+  forParents ForParents[]
+  levels     Level[]
 
   vocabularies Vocabulary[]
   videos       Video[]
@@ -133,6 +133,15 @@ model Newsletter {
   createdAt DateTime @default(now())
 
   @@map("newsletters")
+}
+
+model ForParents {
+  id          String  @id @default(uuid())
+  message     String
+  documentUrl String?
+
+  newsletterId String
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
 }
 
 model Vocabulary {
@@ -152,6 +161,7 @@ model Video {
   newsletterId String
   title        String
   videoUrl     String
+  thumbnailUrl String?
   newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
 
   @@map("videos")
@@ -162,6 +172,7 @@ model Playlist {
   newsletterId String         @unique
   title        String?
   links        PlaylistLink[]
+  url          String?
 
   newsletter Newsletter @relation(fields: [newsletterId], references: [id])
 
