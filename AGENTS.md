@@ -1,4 +1,4 @@
-# 🤖 Guía para Agentes LLM - Menu Digital Project
+# 🤖 Guía para Agentes LLM - Project
 
 > **Propósito**: Este documento es una guía completa para que agentes LLM trabajen eficientemente en este proyecto. Se enfoca en **cómo trabajar**, no en qué hace el proyecto.
 

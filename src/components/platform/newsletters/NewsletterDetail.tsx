@@ -32,7 +32,6 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
     transition: { duration: 0.5 },
   }
 
-
   return (
     <div className="container px-0 md:px-8 py-8 md:py-12">
       {/* Header */}
@@ -91,24 +90,24 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                 <CardContent>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
                     {newsletter.vocabularies.map((vocab) => (
-                      <div key={vocab.id} className="flex gap-4 p-4 border rounded-xl hover:border-primary transition-all bg-card shadow-sm overflow-hidden">
-                        <div className="relative w-24 h-24 flex-shrink-0 bg-muted rounded-lg overflow-hidden border">
+                      <div key={vocab.id} className="flex flex-col border rounded-2xl hover:border-primary transition-all bg-card shadow-md overflow-hidden group">
+                        <div className="relative aspect-square w-full bg-muted overflow-hidden border-b">
                           {vocab.imageUrl ? (
                             <Image
                               src={vocab.imageUrl}
                               alt={vocab.word}
                               fill
-                              className="object-cover"
+                              className="object-cover transition-transform duration-500 group-hover:scale-105"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                              <Book className="h-8 w-8 opacity-20" />
+                              <Book className="h-12 w-12 opacity-20" />
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-col justify-center">
-                          <p className="font-bold text-lg">{vocab.word}</p>
-                          <p className="text-sm text-primary font-medium italic">/{vocab.pronunciation}/</p>
+                        <div className="p-4 flex flex-col items-center justify-center text-center">
+                          <p className="font-bold text-xl text-primary group-hover:text-primary/80 transition-colors uppercase tracking-tight">{vocab.word}</p>
+                          <p className="text-sm text-muted-foreground font-medium italic">/{vocab.pronunciation}/</p>
                         </div>
                       </div>
                     ))}
@@ -160,6 +159,8 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                                 <Image
                                   src={video.thumbnailUrl || "/imgs/placeholder.jpg"}
                                   alt={video.title}
+                                  width={100}
+                                  height={100}
                                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
 
