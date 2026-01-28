@@ -56,7 +56,7 @@ export default function HeaderClient({ hasCourse }: HeaderClientProps) {
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {isProfilePage ? "Home" : "Profile"}
+                  {isProfilePage ? "Newsletters" : "Profile"}
                 </motion.span>
               </Link>
             </Button>
