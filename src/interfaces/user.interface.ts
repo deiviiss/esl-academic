@@ -1,3 +1,5 @@
+import { Role } from '@prisma/client'
+
 export interface User {
   id: string
   name: string
@@ -7,8 +9,7 @@ export interface User {
   phoneNumberVerified: boolean | null
   isActive: boolean
   image?: string | null
-  role: string
-  level?: string | null
+  role: Role
   password: string
   avatarUrl?: string;
   subscriptionPlan?: {

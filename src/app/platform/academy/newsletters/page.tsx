@@ -1,42 +1,24 @@
 import NewsletterList from "@/components/platform/newsletters/NewsletterList"
+import { ChildSelector } from "@/components/platform/newsletters/ChildSelector"
 import { getUserSessionServer } from "@/actions/auth/getUserSessionServer"
 import { userHasAcademy } from "@/lib/access"
 import { redirect } from "next/navigation"
 import type { Metadata } from "next"
+import { getUserChildren } from "@/actions/users/children.actions"
+import { getNewslettersByLevel, getAllNewsletters } from "@/actions/newsletters/newsletter.actions"
 
 export const metadata: Metadata = {
   title: "Newsletters | Miss Kelly ESL Academy",
-  description: "Browse our monthly newsletters for different academic levels.",
+  description: "Browse our monthly newsletters.",
 }
 
-// Simulación de obtención de datos
-const getNewslettersByLevel = () => {
-  // En una aplicación real, esto vendría de una API o base de datos
-  return {
-    toddlers: [
-      { id: "n1", title: "April 2025 Newsletter", month: "2025-04-01" },
-      { id: "n2", title: "May 2025 Newsletter", month: "2025-05-01" },
-      { id: "n5", title: "March 2025 Newsletter", month: "2025-03-01" },
-      { id: "n6", title: "February 2025 Newsletter", month: "2025-02-01" },
-    ],
-    nursery: [
-      { id: "n3", title: "April 2025 Newsletter", month: "2025-04-01" },
-      { id: "n7", title: "March 2025 Newsletter", month: "2025-03-01" },
-      { id: "n8", title: "February 2025 Newsletter", month: "2025-02-01" },
-      { id: "n9", title: "January 2025 Newsletter", month: "2025-01-01" },
-    ],
-    prek: [
-      { id: "n4", title: "May 2025 Newsletter", month: "2025-05-01" },
-      { id: "n10", title: "April 2025 Newsletter", month: "2025-04-01" },
-      { id: "n11", title: "March 2025 Newsletter", month: "2025-03-01" },
-      { id: "n12", title: "February 2025 Newsletter", month: "2025-02-01" },
-    ],
-  }
-}
-
-export default async function NewslettersPage() {
-  const session = await getUserSessionServer()
-  if (!session) redirect("/")
+export default async function NewslettersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ childId?: string }>
+}) {
+  // Session is guaranteed by AuthLayout + AcademyLayout (route-level access control)
+  const session = (await getUserSessionServer())!
 
   const userId = session.id
   const isAdmin = session.role === "admin"
@@ -44,9 +26,37 @@ export default async function NewslettersPage() {
   const hasAcademy = await userHasAcademy(userId)
   if (!hasAcademy && !isAdmin) redirect("/no-access")
 
-  const allowedLevels = isAdmin ? ["toddlers", "nursery", "prek"] : ((session).level ? [(session).level] : [])
+  const { childId } = await searchParams
 
-  const newslettersByLevel = getNewslettersByLevel()
+  // Admin view: shows all newsletters without child filtering
+  if (isAdmin) {
+    const newsletters = await getAllNewsletters()
+    return <NewsletterList newsletters={newsletters} />
+  }
 
-  return <NewsletterList newslettersByLevel={newslettersByLevel} allowedLevels={allowedLevels} />
+  const userChildren = await getUserChildren(userId)
+
+  if (userChildren.length === 0) {
+    return (
+      <div className="container py-12 text-center">
+        <h1 className="text-2xl font-bold mb-4 text-primary">No enrollments found</h1>
+        <p className="text-muted-foreground">It seems you don&apos;t have any children enrolled in the academy yet. Please contact Miss Kelly for assistance.</p>
+      </div>
+    )
+  }
+
+  const selectedChild = childId
+    ? (userChildren).find((c) => c.id === childId) || userChildren[0]
+    : userChildren[0]
+
+  const newsletters = await getNewslettersByLevel((selectedChild).levelId)
+
+  return (
+    <>
+      {userChildren.length > 1 && (
+        <ChildSelector childrenList={userChildren} selectedChildId={(selectedChild).id} />
+      )}
+      <NewsletterList newsletters={newsletters} selectedChild={selectedChild} />
+    </>
+  )
 }

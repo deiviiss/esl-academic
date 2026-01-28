@@ -122,7 +122,7 @@ export default function GoogleReviews() {
     const fetchReviews = async () => {
       try {
         const data = await getGoogleReviews()
-        console.log('data', data)
+
         setReviewsData(data)
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred')

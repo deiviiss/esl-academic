@@ -1,34 +1,20 @@
 "use client"
 
-import { useState } from "react"
 import { motion } from "framer-motion"
 import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Calendar, ChevronRight, GraduationCap, Newspaper } from "lucide-react"
+import { Calendar, ChevronRight, Newspaper } from "lucide-react"
 import Link from "next/link"
-
-interface Newsletter {
-  id: string
-  title: string
-  month: string
-}
-
-interface NewslettersByLevel {
-  toddlers: Newsletter[]
-  nursery: Newsletter[]
-  prek: Newsletter[]
-}
+import { ChildSummary } from "@/interfaces/child.interface"
+import { NewsletterListItem } from "@/interfaces/newsletter.interface"
 
 interface NewsletterListProps {
-  newslettersByLevel: NewslettersByLevel
-  allowedLevels: string[]
+  newsletters: NewsletterListItem[]
+  selectedChild?: ChildSummary
 }
 
-export default function NewsletterList({ newslettersByLevel, allowedLevels }: NewsletterListProps) {
-  const [activeLevel, setActiveLevel] = useState(allowedLevels[0] || "toddlers")
-
+export default function NewsletterList({ newsletters, selectedChild }: NewsletterListProps) {
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
@@ -53,62 +39,55 @@ export default function NewsletterList({ newslettersByLevel, allowedLevels }: Ne
       >
         <h1 className="text-3xl md:text-4xl font-bold text-primary flex items-center justify-center gap-2">
           <Newspaper className="h-8 w-8" />
-          Newsletters
+          {selectedChild ? `${selectedChild.name}'s Newsletters` : 'Newsletters'}
         </h1>
-        <p className="text-muted-foreground mt-2">Browse our monthly newsletters by academic level</p>
+        <p className="text-muted-foreground mt-2">
+          {selectedChild
+            ? `Monthly newsletters for ${selectedChild.level.name} level`
+            : 'Browse our monthly newsletters'}
+        </p>
       </motion.div>
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
-        <Tabs value={activeLevel} onValueChange={setActiveLevel} className="w-full">
-          <div className="flex justify-center mb-6">
-            <TabsList className={`grid w-full max-w-md grid-cols-${allowedLevels.length}`}>
-              {allowedLevels.map((level) => (
-                <TabsTrigger key={level} value={level} className="flex items-center justify-center">
-                  <GraduationCap className="h-4 w-4 mr-2 hidden sm:block" />
-                  <span>{level.charAt(0).toUpperCase() + level.slice(1)}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+        {newsletters.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground italic">No newsletters available for this month.</p>
           </div>
-
-          {Object.entries(newslettersByLevel).filter(([level]) => allowedLevels.includes(level)).map(([level, newsletters]: [string, Newsletter[]]) => (
-            <TabsContent key={level} value={level}>
-              <motion.div
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-                variants={staggerContainer}
-                initial="initial"
-                animate="animate"
-              >
-                {newsletters.map((newsletter) => (
-                  <motion.div key={newsletter.id} variants={fadeInUp}>
-                    <Card className="h-full flex flex-col">
-                      <CardHeader>
-                        <div className="flex items-center text-sm text-muted-foreground mb-2">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {format(new Date(newsletter.month), "MMMM yyyy")}
-                        </div>
-                        <CardTitle>{newsletter.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex-grow">
-                        <p className="text-muted-foreground text-sm">
-                          Monthly newsletter with vocabulary, educational links, and important information for parents.
-                        </p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button className="w-full" asChild>
-                          <Link href={`/platform/academy/newsletters/${newsletter.id}`}>
-                            View Details
-                            <ChevronRight className="h-4 w-4 ml-2" />
-                          </Link>
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  </motion.div>
-                ))}
+        ) : (
+          <motion.div
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            variants={staggerContainer}
+            initial="initial"
+            animate="animate"
+          >
+            {newsletters.map((newsletter) => (
+              <motion.div key={newsletter.id} variants={fadeInUp}>
+                <Card className="h-full flex flex-col">
+                  <CardHeader>
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      {format(new Date(newsletter.month), "MMMM yyyy")}
+                    </div>
+                    <CardTitle>{newsletter.title}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="text-muted-foreground text-sm">
+                      Monthly learning materials, vocabulary, and important information for parents.
+                    </p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button className="w-full" asChild>
+                      <Link href={`/platform/academy/newsletters/${newsletter.id}`}>
+                        View Details
+                        <ChevronRight className="h-4 w-4 ml-2" />
+                      </Link>
+                    </Button>
+                  </CardFooter>
+                </Card>
               </motion.div>
-            </TabsContent>
-          ))}
-        </Tabs>
+            ))}
+          </motion.div>
+        )}
       </motion.div>
     </div>
   )

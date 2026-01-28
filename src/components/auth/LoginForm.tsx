@@ -19,23 +19,23 @@ import Image from 'next/image'
 
 const loginSchema = z.object({
   email: z.string({
-    required_error: 'El correo electrónico es requerido',
-    message: 'Correo electrónico no válido'
+    required_error: 'Email is required',
+    message: 'Invalid email address'
   }).email({
-    message: 'Correo electrónico no válido'
+    message: 'Invalid email address'
   }),
   password: z.string({
-    required_error: 'La contraseña es requerida',
-    message: 'Contraseña no válida'
+    required_error: 'Password is required',
+    message: 'Invalid password'
   }).min(6, {
-    message: 'La contraseña debe tener al menos 6 caracteres'
+    message: 'Password must be at least 6 characters long'
   })
 })
 
 export const LoginForm = () => {
   const searchParams = useSearchParams()
 
-  const redirectTo = searchParams.get('redirectTo') || '/platform/profile'
+  const redirectTo = searchParams.get('redirectTo') || '/platform/academy/newsletters'
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
 

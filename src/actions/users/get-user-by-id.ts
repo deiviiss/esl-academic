@@ -1,6 +1,6 @@
 'use server'
 
-import { type User } from '@/interfaces/users/user.interface'
+import { type User } from '@/interfaces/user.interface'
 import prisma from '@/lib/prisma'
 
 interface Response {

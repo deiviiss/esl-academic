@@ -8,11 +8,10 @@ import { usePathname } from 'next/navigation'
 import Image from "next/image"
 
 interface HeaderClientProps {
-  hasAcademy: boolean
   hasCourse: boolean
 }
 
-export default function HeaderClient({ hasAcademy, hasCourse }: HeaderClientProps) {
+export default function HeaderClient({ hasCourse }: HeaderClientProps) {
   const path = usePathname()
   const isProfilePage = path.includes('/platform/profile')
 
@@ -35,21 +34,6 @@ export default function HeaderClient({ hasAcademy, hasCourse }: HeaderClientProp
           </Link>
 
           <nav className="hidden md:flex gap-6">
-            {hasAcademy && (
-              <>
-                {["Newsletters", "Learning", "Moments"].map((item) => (
-                  <Link key={item} href={`/platform/academy/${item.toLowerCase().replace(" ", "-")}`}>
-                    <motion.span
-                      className="text-sm font-medium text-muted-foreground hover:text-primary"
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                    >
-                      {item}
-                    </motion.span>
-                  </Link>
-                ))}
-              </>
-            )}
             {hasCourse && (
               <Link href="/platform/course">
                 <motion.span
@@ -67,35 +51,18 @@ export default function HeaderClient({ hasAcademy, hasCourse }: HeaderClientProp
             <Button
               asChild
             >
-              {
-                <Link href={isProfilePage ? "/platform" : "/platform/profile"} >
-                  <motion.span
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {isProfilePage ? "Home" : "Profile"}
-                  </motion.span>
-                </Link>
-              }
+              <Link href={isProfilePage ? "/platform" : "/platform/profile"} >
+                <motion.span
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {isProfilePage ? "Home" : "Profile"}
+                </motion.span>
+              </Link>
             </Button>
           </div>
         </div>
         <nav className="flex md:hidden gap-6">
-          {hasAcademy && (
-            <>
-              {["Newsletters", "Learning", "Moments"].map((item) => (
-                <Link key={item} href={`/platform/academy/${item.toLowerCase().replace(" ", "-")}`}>
-                  <motion.span
-                    className="text-sm font-medium text-muted-foreground hover:text-primary"
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    {item}
-                  </motion.span>
-                </Link>
-              ))}
-            </>
-          )}
           {hasCourse && (
             <Link href="/platform/course">
               <motion.span

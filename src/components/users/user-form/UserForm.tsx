@@ -12,7 +12,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { titleFont } from '@/config/fonts'
-import { type User } from '@/interfaces/users/user.interface'
+import { type User } from '@/interfaces/user.interface'
 import { noticeFailure, noticeSuccess } from '@/components/toast-notifications/ToastNotifications'
 
 const formUserSchema = z.object({
@@ -35,7 +35,8 @@ const formUserSchema = z.object({
     .refine(value => value === '' || (value.length >= 6 && value.length <= 10), {
       message: 'The password must be between 6 and 10 characters if it will be changed'
     }),
-  level: z.enum(["toddlers", "nursery", "prek"]).optional()
+  role: z.enum(["admin", "user"]).optional(),
+  isActive: z.boolean().optional()
 })
 
 interface Props {
@@ -53,7 +54,8 @@ export const UserForm = ({ user }: Props) => {
     email: user.email,
     phoneNumber: user.phoneNumber,
     password: '',
-    level: user.level as "toddlers" | "nursery" | "prek" | undefined
+    role: user.role as "admin" | "user" | undefined,
+    isActive: user.isActive
   }
 
   const form = useForm<z.infer<typeof formUserSchema>>({
@@ -64,7 +66,7 @@ export const UserForm = ({ user }: Props) => {
   const onSubmit = async (values: z.infer<typeof formUserSchema>) => {
     setIsSubmitting(true)
 
-    const { ok, message } = await updateUser({ ...values, level: values.level })
+    const { ok, message } = await updateUser(values)
     if (!ok) {
       noticeFailure(message)
 
@@ -178,26 +180,45 @@ export const UserForm = ({ user }: Props) => {
 
               <FormField
                 control={form.control}
-                name="level"
+                name="role"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Level</FormLabel>
+                    <FormLabel>Role</FormLabel>
                     <Select onValueChange={field.onChange} defaultValue={field.value}>
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select a level" />
+                          <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="toddlers">Toddlers</SelectItem>
-                        <SelectItem value="nursery">Nursery</SelectItem>
-                        <SelectItem value="prek">Pre-K</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                        <SelectItem value="user">User</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormDescription>
-                      Assign the academic level for this user.
-                    </FormDescription>
                     <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="isActive"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <div className="space-y-0.5">
+                      <FormLabel>Active Status</FormLabel>
+                      <FormDescription>
+                        Is this user account active?
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <input
+                        type="checkbox"
+                        checked={field.value}
+                        onChange={field.onChange}
+                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                      />
+                    </FormControl>
                   </FormItem>
                 )}
               />
