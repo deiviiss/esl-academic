@@ -21,18 +21,11 @@ interface ChildSelectorProps {
 
 export function ChildSelector({ childrenList, selectedChildId }: ChildSelectorProps) {
   const router = useRouter()
-  const [isExpanded, setIsExpanded] = useState(true)
+  const [isExpanded, setIsExpanded] = useState(false)
   const containerRef = useRef<HTMLDivElement>(null)
 
   const selectedChild = childrenList.find(c => c.id === selectedChildId) || childrenList[0]
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsExpanded(false)
-    }, 3000) // Auto hide after 5 seconds
-
-    return () => clearTimeout(timer)
-  }, [])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

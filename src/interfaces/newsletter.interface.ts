@@ -21,15 +21,15 @@ export interface VideoItem {
 
 export interface PlaylistLinkItem {
   id: string
-  title?: string
+  title: string | null
   url: string
 }
 
 export interface PlaylistData {
   id: string
-  title?: string
+  title: string | null
   links: PlaylistLinkItem[]
-  url?: string
+  url: string | null
 }
 
 export interface ForParentsData {
@@ -46,6 +46,6 @@ export interface NewsletterDetailData {
 
   vocabularies: VocabularyItem[]
   videos: VideoItem[]
-  playlist?: PlaylistData;
+  playlist: PlaylistData | null;
   forParents: ForParentsData[];
 }
