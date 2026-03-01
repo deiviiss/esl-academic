@@ -66,7 +66,10 @@ export default function NewsletterList({ newsletters, selectedChild }: Newslette
                   <CardHeader>
                     <div className="flex items-center text-sm text-muted-foreground mb-2">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {format(new Date(newsletter.month), "MMMM yyyy")}
+                      {(() => {
+                        const d = new Date(newsletter.month);
+                        return format(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()), "MMMM yyyy");
+                      })()}
                     </div>
                     <CardTitle>{newsletter.title}</CardTitle>
                   </CardHeader>

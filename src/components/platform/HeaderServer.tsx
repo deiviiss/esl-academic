@@ -7,6 +7,7 @@ export default async function HeaderServer() {
   const user = session || null
 
   const hasCourse = user ? await userHasCourse(user.id) : false
+  const isAdmin = user?.role === "admin"
 
-  return <HeaderClient hasCourse={hasCourse} />
+  return <HeaderClient hasCourse={hasCourse} isAdmin={isAdmin} />
 }

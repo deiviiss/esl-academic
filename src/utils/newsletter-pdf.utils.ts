@@ -190,7 +190,11 @@ export const generateVocabularyPDF = async (
     // IMAGE 
     try {
       if (vocab.imageUrl) {
-        const img = await loadImage(vocab.imageUrl)
+        const isFullUrl = vocab.imageUrl.startsWith("http") || vocab.imageUrl.startsWith("/") || vocab.imageUrl.startsWith("data:")
+        const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
+        const imageUrl = isFullUrl ? vocab.imageUrl : `https://res.cloudinary.com/${cloudName}/image/upload/${vocab.imageUrl}`
+
+        const img = await loadImage(imageUrl)
         const imgSize = Math.min(cellWidth - 8, cellHeight - 40)
         const imgX = x + (cellWidth - imgSize) / 2
         const imgY = y + 4

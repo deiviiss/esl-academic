@@ -1,8 +1,12 @@
+import { Level } from "./level.interface"
+
 export interface NewsletterListItem {
   id: string
   title: string
   month: Date | string
   year: number
+  levels: Level[]
+  createdAt: Date | string
 }
 
 export interface VocabularyItem {
@@ -48,4 +52,16 @@ export interface NewsletterDetailData {
   videos: VideoItem[]
   playlist: PlaylistData | null;
   forParents: ForParentsData[];
+}
+
+export interface NewsletterData {
+  id: string
+  title: string
+  month: Date | string
+  year: number
+  levels: Level[]
+  vocabularies: VocabularyItem[]
+  videos: VideoItem[]
+  playlist: PlaylistData | null
+  forParents: ForParentsData[]
 }

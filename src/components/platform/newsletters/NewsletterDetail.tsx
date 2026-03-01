@@ -3,7 +3,8 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import { format } from "date-fns"
-import Image from "next/image"
+import { CloudinaryImage } from "@/components/platform/CloudinaryImage"
+import { getCloudinaryVideoUrl, getCloudinaryVideoThumbnail } from "@/utils/cloudinary.utils"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -24,7 +25,12 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
 
-  const formattedDate = format(new Date(newsletter.month), "MMMM yyyy")
+  // Use UTC components to avoid timezone shift (e.g., March 1st UTC showing as Feb 28th Local)
+  const date = new Date(newsletter.month)
+  const formattedDate = format(
+    new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()),
+    "MMMM yyyy"
+  )
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -93,7 +99,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                       <div key={vocab.id} className="flex flex-col border rounded-2xl hover:border-primary transition-all bg-card shadow-md overflow-hidden group">
                         <div className="relative aspect-square w-full bg-muted overflow-hidden border-b">
                           {vocab.imageUrl ? (
-                            <Image
+                            <CloudinaryImage
                               src={vocab.imageUrl}
                               alt={vocab.word}
                               fill
@@ -141,7 +147,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                           <div className="aspect-[9/16] w-full rounded-2xl overflow-hidden border bg-black shadow-2xl relative group ring-1 ring-primary/10">
                             {activeVideoId === video.id ? (
                               <video
-                                src={video.videoUrl}
+                                src={getCloudinaryVideoUrl(video.videoUrl)}
                                 title={video.title}
                                 className="w-full h-full"
                                 controls
@@ -156,11 +162,11 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                                 {/* Thumbnail with object-cover to provide the "cut" effect */}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent z-10" />
 
-                                <Image
-                                  src={video.thumbnailUrl || "/imgs/placeholder.jpg"}
+                                <CloudinaryImage
+                                  src={video.thumbnailUrl || getCloudinaryVideoThumbnail(video.videoUrl)}
                                   alt={video.title}
-                                  width={100}
-                                  height={100}
+                                  width={400}
+                                  height={711}
                                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 />
 
