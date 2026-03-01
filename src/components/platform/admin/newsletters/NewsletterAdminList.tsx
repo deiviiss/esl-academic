@@ -5,6 +5,7 @@ import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, Edit, Trash2, Plus } from "lucide-react"
+import { toast } from "sonner"
 import Link from "next/link"
 import { NewsletterListItem } from "@/interfaces/newsletter.interface"
 import { deleteNewsletter } from "@/actions/newsletters/newsletter.actions"
@@ -28,9 +29,10 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
     const result = await deleteNewsletter(id)
 
     if (result.ok) {
+      toast.success("Newsletter deleted successfully")
       router.refresh()
     } else {
-      alert(result.message || "Error deleting newsletter")
+      toast.error(result.message || "Error deleting newsletter")
       setDeletingId(null)
     }
   }
@@ -91,7 +93,10 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
                   <CardHeader>
                     <div className="flex items-center text-sm text-muted-foreground mb-2">
                       <Calendar className="h-4 w-4 mr-1" />
-                      {format(new Date(newsletter.month), "MMMM yyyy")}
+                      {(() => {
+                        const d = new Date(newsletter.month);
+                        return format(new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()), "MMMM yyyy");
+                      })()}
                     </div>
                     <CardTitle>{newsletter.title}</CardTitle>
                   </CardHeader>

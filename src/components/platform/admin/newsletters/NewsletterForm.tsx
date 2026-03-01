@@ -1,13 +1,18 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
+import { CldUploadWidget, CldImage } from "next-cloudinary"
+import { CloudinaryImage } from "@/components/platform/CloudinaryImage"
+import { getCloudinaryVideoThumbnail } from "@/utils/cloudinary.utils"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, Save, X } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Plus, Trash2, X, Play, Save, Video } from "lucide-react"
 import { createNewsletter, updateNewsletter } from "@/actions/newsletters/newsletter.actions"
 import { NewsletterData } from "@/interfaces/newsletter.interface"
 import { Textarea } from "@/components/ui/textarea"
@@ -45,10 +50,26 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
 
   // Basic fields
   const [title, setTitle] = useState(newsletter?.title || "")
+  // month stores "1" to "12"
   const [month, setMonth] = useState(
-    newsletter?.month ? new Date(newsletter.month).toISOString().slice(0, 7) : ""
+    newsletter?.month ? (new Date(newsletter.month).getUTCMonth() + 1).toString() : (new Date().getMonth() + 1).toString()
   )
   const [year, setYear] = useState(newsletter?.year.toString() || new Date().getFullYear().toString())
+
+  const months = [
+    { value: "1", label: "January" },
+    { value: "2", label: "February" },
+    { value: "3", label: "March" },
+    { value: "4", label: "April" },
+    { value: "5", label: "May" },
+    { value: "6", label: "June" },
+    { value: "7", label: "July" },
+    { value: "8", label: "August" },
+    { value: "9", label: "September" },
+    { value: "10", label: "October" },
+    { value: "11", label: "November" },
+    { value: "12", label: "December" },
+  ]
   const [selectedLevels, setSelectedLevels] = useState<string[]>(
     newsletter?.levels.map(l => l.id) || []
   )
@@ -68,6 +89,22 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   const [playlistLinks, setPlaylistLinks] = useState<PlaylistLinkItem[]>(
     newsletter?.playlist?.links ? newsletter.playlist.links.map(l => ({ ...l, title: l.title ?? null })) : []
   )
+
+  // Fix for next-cloudinary scroll lock issue
+  useEffect(() => {
+    // Ensuring body scroll is always enabled when the form is active
+    // This counters the 'overflow: hidden' bug from Cloudinary widget
+    const handleScrollReset = () => {
+      if (document.body.style.overflow === "hidden") {
+        document.body.style.overflow = "auto"
+      }
+    }
+
+    handleScrollReset()
+
+    // Also reset on any state change that might cause a re-render
+    return () => handleScrollReset()
+  }, [vocabularies, videos])
 
   const handleLevelToggle = (levelId: string) => {
     setSelectedLevels(prev =>
@@ -137,20 +174,25 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
     e.preventDefault()
 
     if (!title || !month || !year || selectedLevels.length === 0) {
-      alert("Please complete all required fields: Title, Month, Year and at least one Level.")
+      toast.error("Please complete all required fields: Title, Month, Year and at least one Level.")
       return
     }
 
     setIsSubmitting(true)
 
-    const monthDate = new Date(`${month}-01`)
+    // Create date at midnight UTC for the 1st of the month
+    const monthDate = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1))
 
-    const data: any = {
+    const data = {
       title,
       month: monthDate,
       year: parseInt(year),
       levelIds: selectedLevels,
-      vocabularies: vocabularies.filter(v => v.word && v.pronunciation && v.imageUrl),
+      vocabularies: vocabularies.filter(v => v.word && v.pronunciation && v.imageUrl).map(v => ({
+        word: v.word,
+        pronunciation: v.pronunciation,
+        imageUrl: v.imageUrl
+      })),
       videos: videos.filter(v => v.title && v.videoUrl).map(v => ({
         title: v.title,
         videoUrl: v.videoUrl,
@@ -175,10 +217,11 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
       : await createNewsletter(data)
 
     if (result.ok) {
+      toast.success(newsletter ? "Newsletter updated successfully" : "Newsletter created successfully")
       router.push("/platform/admin/newsletters")
       router.refresh()
     } else {
-      alert(result.message || "Error saving newsletter")
+      toast.error(result.message || "Error saving newsletter")
       setIsSubmitting(false)
     }
   }
@@ -220,7 +263,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
         initial="initial"
         animate="animate"
       >
-        {/* Información General */}
+        {/* General Information */}
         <motion.div variants={fadeInUp}>
           <Card>
             <CardHeader>
@@ -241,13 +284,18 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="month">Month *</Label>
-                  <Input
-                    id="month"
-                    type="month"
-                    value={month}
-                    onChange={(e) => setMonth(e.target.value)}
-                    required
-                  />
+                  <Select value={month} onValueChange={setMonth}>
+                    <SelectTrigger id="month">
+                      <SelectValue placeholder="Select month" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map((m) => (
+                        <SelectItem key={m.value} value={m.value}>
+                          {m.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div>
                   <Label htmlFor="year">Year *</Label>
@@ -281,7 +329,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
           </Card>
         </motion.div>
 
-        {/* Vocabulario */}
+        {/* Vocabulary */}
         <motion.div variants={fadeInUp}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
@@ -319,13 +367,50 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                         placeholder="Pronunciation"
                       />
                     </div>
-                    <div>
-                      <Label>Image URL</Label>
-                      <Input
-                        value={vocab.imageUrl}
-                        onChange={(e) => updateVocabulary(index, "imageUrl", e.target.value)}
-                        placeholder="https://..."
-                      />
+                    <div className="space-y-2">
+                      <Label>Image</Label>
+                      {vocab.imageUrl ? (
+                        <div className="relative w-full aspect-square max-w-[120px] rounded-lg overflow-hidden border">
+                          <CldImage
+                            width="120"
+                            height="120"
+                            src={vocab.imageUrl}
+                            alt={vocab.word || "Vocabulary image"}
+                            className="object-cover"
+                          />
+                          <Button
+                            type="button"
+                            variant="destructive"
+                            size="icon"
+                            className="absolute top-1 right-1 h-6 w-6"
+                            onClick={() => updateVocabulary(index, "imageUrl", "")}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <CldUploadWidget
+                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                          onClose={() => { document.body.style.overflow = "auto" }}
+                          onSuccess={(result) => {
+                            if (result.info && typeof result.info !== "string") {
+                              updateVocabulary(index, "imageUrl", result.info.public_id)
+                            }
+                          }}
+                        >
+                          {({ open }) => (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full h-[120px] border-dashed flex flex-col items-center justify-center"
+                              onClick={() => open()}
+                            >
+                              <Plus className="h-4 w-4 mb-2" />
+                              <span className="text-xs">Upload Image</span>
+                            </Button>
+                          )}
+                        </CldUploadWidget>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -364,22 +449,60 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                         placeholder="Video Title"
                       />
                     </div>
-                    <div>
-                      <Label>Video URL</Label>
-                      <Input
-                        value={video.videoUrl}
-                        onChange={(e) => updateVideo(index, "videoUrl", e.target.value)}
-                        placeholder="https://youtube.com/..."
-                      />
+                    <div className="space-y-4">
+                      <Label>Video</Label>
+                      {video.videoUrl ? (
+                        <div className="space-y-2">
+                          <div className="aspect-[9/16] w-32 rounded-lg overflow-hidden border bg-muted relative group">
+                            <CloudinaryImage
+                              src={getCloudinaryVideoThumbnail(video.videoUrl)}
+                              alt={video.title}
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Play className="h-8 w-8 text-white fill-current" />
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="w-full text-destructive"
+                            onClick={() => updateVideo(index, "videoUrl", "")}
+                          >
+                            <X className="h-4 w-4 mr-2" /> Remove Video
+                          </Button>
+                        </div>
+                      ) : (
+                        <CldUploadWidget
+                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                          onClose={() => { document.body.style.overflow = "auto" }}
+                          options={{
+                            resourceType: "video",
+                            maxFiles: 1,
+                            folder: "esl-academy/newsletters/videos",
+                          }}
+                          onSuccess={(result) => {
+                            if (result.info && typeof result.info !== "string") {
+                              updateVideo(index, "videoUrl", result.info.public_id);
+                            }
+                          }}
+                        >
+                          {({ open }) => (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              className="w-full h-32 border-dashed border-2 flex flex-col gap-2"
+                              onClick={() => open()}
+                            >
+                              <Video className="h-8 w-8 text-muted-foreground" />
+                              <span className="text-sm text-muted-foreground">Upload Video</span>
+                            </Button>
+                          )}
+                        </CldUploadWidget>
+                      )}
                     </div>
-                  </div>
-                  <div>
-                    <Label>Thumbnail URL (optional)</Label>
-                    <Input
-                      value={video.thumbnailUrl || ""}
-                      onChange={(e) => updateVideo(index, "thumbnailUrl", e.target.value)}
-                      placeholder="https://..."
-                    />
                   </div>
                 </div>
               ))}
@@ -497,7 +620,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
           </Card>
         </motion.div>
 
-        {/* Botones */}
+        {/* Buttons */}
         <motion.div variants={fadeInUp} className="flex justify-end gap-4 pt-4">
           <Button
             type="button"

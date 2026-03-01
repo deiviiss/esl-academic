@@ -5,8 +5,8 @@ import { redirect } from "next/navigation"
 import type { Metadata } from "next"
 
 export const metadata: Metadata = {
-  title: "Gestión de Newsletters | Admin",
-  description: "Administra las newsletters de la plataforma.",
+  title: "Newsletter Management | Admin",
+  description: "Manage the platform's newsletters."
 }
 
 export default async function AdminNewslettersPage() {

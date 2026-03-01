@@ -167,6 +167,8 @@ export const updateNewsletter = async (
   }
 ) => {
   try {
+    console.log('UPDATING NEWSLETTER:', id)
+    console.log('DATA:', JSON.stringify(data, null, 2))
     // Use transaction to ensure atomicity
     const newsletter = await prisma.$transaction(async (tx) => {
       // Delete existing nested relations
@@ -228,7 +230,10 @@ export const updateNewsletter = async (
 
     return { ok: true, newsletter }
   } catch (error) {
-    console.error('Error updating newsletter:', error)
+    console.log('AN ERROR OCCURRED DURING UPDATE')
+    if (error && typeof error === 'object') {
+      console.log('ERROR MESSAGE:', error || 'No message')
+    }
     return { ok: false, message: 'Failed to update newsletter' }
   }
 }
@@ -238,13 +243,32 @@ export const updateNewsletter = async (
  */
 export const deleteNewsletter = async (id: string) => {
   try {
-    await prisma.newsletter.delete({
-      where: { id }
+    await prisma.$transaction(async (tx) => {
+      // Delete existing nested relations
+      await tx.vocabulary.deleteMany({ where: { newsletterId: id } })
+      await tx.video.deleteMany({ where: { newsletterId: id } })
+      await tx.forParents.deleteMany({ where: { newsletterId: id } })
+
+      // Delete playlist and its links
+      const existingPlaylist = await tx.playlist.findUnique({
+        where: { newsletterId: id }
+      })
+      if (existingPlaylist) {
+        await tx.playlistLink.deleteMany({ where: { playlistId: existingPlaylist.id } })
+        await tx.playlist.delete({ where: { id: existingPlaylist.id } })
+      }
+
+      await tx.newsletter.delete({
+        where: { id }
+      })
     })
 
     return { ok: true }
   } catch (error) {
-    console.error('Error deleting newsletter:', error)
+    console.log('AN ERROR OCCURRED DURING DELETE')
+    if (error && typeof error === 'object') {
+      console.log('ERROR MESSAGE:', error || 'No message')
+    }
     return { ok: false, message: 'Failed to delete newsletter' }
   }
 }

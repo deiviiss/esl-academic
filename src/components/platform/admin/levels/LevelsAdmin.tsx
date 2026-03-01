@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Plus, Edit2, Trash2, X, Save, AlertCircle } from "lucide-react"
+import { toast } from "sonner"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -54,9 +55,10 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
 
     if (result.ok) {
       handleCancel()
+      toast.success(editingId ? "Level updated successfully" : "Level created successfully")
       router.refresh()
     } else {
-      alert(result.message || "Error saving level")
+      toast.error(result.message || "Error saving level")
     }
     setIsSubmitting(false)
   }
@@ -66,9 +68,10 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
 
     const result = await deleteLevel(id)
     if (result.ok) {
+      toast.success("Level deleted successfully")
       router.refresh()
     } else {
-      alert(result.message || "Error deleting level")
+      toast.error(result.message || "Error deleting level")
     }
   }
 
