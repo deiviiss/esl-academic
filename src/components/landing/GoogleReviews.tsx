@@ -4,6 +4,7 @@ import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { titleFont } from "@/config/fonts"
 import { Card, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Star } from "lucide-react"
@@ -54,7 +55,7 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.1 }}
     >
-      <Card className="h-full shadow-sm hover:shadow-md transition-shadow duration-300">
+      <Card className="h-[200px] shadow-sm hover:shadow-md transition-shadow duration-300">
         <CardContent className="p-6">
           <div className="flex items-start gap-4">
             <Avatar className="h-12 w-12">
@@ -63,25 +64,25 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
                 {review.author.charAt(0).toUpperCase()}
               </AvatarFallback>
             </Avatar>
-            <div className="flex-1 space-y-2">
+            <div className="flex-1 space-y-2 overflow-hidden">
               <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-primary">{review.author}</h4>
+                <h4 className="font-semibold text-primary truncate">{review.author}</h4>
                 <StarRating rating={review.rating} />
               </div>
               <p className="text-sm text-muted-foreground">{review.date}</p>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {shouldTruncate && !isExpanded
-                  ? `${review.text.substring(0, maxLength)}...`
-                  : review.text}
+              <div className="text-sm text-muted-foreground leading-relaxed">
+                <p className="line-clamp-3">
+                  {review.text}
+                </p>
                 {shouldTruncate && (
                   <button
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="ml-2 text-primary hover:underline text-sm font-medium"
+                    className="mt-1 text-primary hover:underline text-sm font-medium"
                   >
-                    {isExpanded ? "ver menos" : "ver más"}
+                    {isExpanded ? "read less" : "read more"}
                   </button>
                 )}
-              </p>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -92,19 +93,20 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
 
 function ReviewSkeleton() {
   return (
-    <Card className="h-full">
+    <Card className="h-[200px]">
       <CardContent className="p-6">
         <div className="flex items-start gap-4">
-          <Skeleton className="h-12 w-12 rounded-full" />
-          <div className="flex-1 space-y-2">
+          <Skeleton className="h-12 w-12 rounded-full flex-shrink-0" />
+          <div className="flex-1 space-y-3">
             <div className="flex items-center justify-between">
               <Skeleton className="h-5 w-24" />
               <Skeleton className="h-4 w-20" />
             </div>
             <Skeleton className="h-4 w-16" />
-            <div className="space-y-2">
+            <div className="space-y-2 pt-2">
               <Skeleton className="h-4 w-full" />
-              <Skeleton className="h-4 w-3/4" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-4 w-2/3" />
             </div>
           </div>
         </div>
@@ -117,6 +119,7 @@ export default function GoogleReviews() {
   const [reviewsData, setReviewsData] = useState<ReviewsData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const placeId = process.env.NEXT_PUBLIC_GOOGLE_PLACE_ID
 
   useEffect(() => {
     const fetchReviews = async () => {
@@ -149,7 +152,7 @@ export default function GoogleReviews() {
   }
 
   return (
-    <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/10">
+    <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/10" id="reviews">
       <div className="container px-4 md:px-6 max-w-6xl mx-auto">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center"
@@ -179,6 +182,25 @@ export default function GoogleReviews() {
             ))
           }
         </div>
+
+        {reviewsData && reviewsData.total > 6 && (
+          <motion.div
+            className="flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Button variant="outline" asChild>
+              <a
+                href={`https://search.google.com/local/reviews?placeid=${placeId}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                View all {reviewsData.total} reviews on Google
+              </a>
+            </Button>
+          </motion.div>
+        )}
       </div>
     </section>
   )

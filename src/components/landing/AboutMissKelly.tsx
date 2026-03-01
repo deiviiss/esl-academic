@@ -1,7 +1,10 @@
 "use client"
 
+import { useState } from "react"
+
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
+import { Skeleton } from "@/components/ui/skeleton"
 import { CheckCircle } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
@@ -20,6 +23,7 @@ interface AboutProps {
 }
 
 export default function AboutMissKelly({ imageUrl }: AboutProps) {
+  const [isImageLoaded, setIsImageLoaded] = useState(false)
 
   return (
     <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/10 scroll-mt-10 md:scroll-mt-0" id="about">
@@ -66,12 +70,20 @@ export default function AboutMissKelly({ imageUrl }: AboutProps) {
             </Button>
           </motion.div>
           <motion.div
-            className="relative w-full aspect-square rounded-lg overflow-hidden"
+            className="relative w-full aspect-square rounded-lg overflow-hidden bg-muted"
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
           >
-            <Image src={imageUrl} alt="Miss Kelly" fill className="object-cover" />
+            {!isImageLoaded && <Skeleton className="absolute inset-0 w-full h-full" />}
+            <Image
+              src={imageUrl}
+              alt="Miss Kelly"
+              fill
+              className={`object-cover transition-opacity duration-300 ${isImageLoaded ? 'opacity-100' : 'opacity-0'
+                }`}
+              onLoad={() => setIsImageLoaded(true)}
+            />
           </motion.div>
         </div>
       </div>

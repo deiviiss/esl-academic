@@ -100,7 +100,7 @@ export default function AdminDashboard() {
       </motion.div>
 
       <motion.div
-        className="grid gap-6 md:grid-cols-2"
+        className="grid gap-6 md:grid-cols-2 mt-4"
         variants={fadeInUp}
         initial="initial"
         animate="animate"

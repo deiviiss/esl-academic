@@ -1,7 +1,9 @@
 "use client"
 
+import { useState } from "react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { Skeleton } from "@/components/ui/skeleton"
 import { titleFont } from "@/config/fonts"
 
 const benefits = [
@@ -26,6 +28,12 @@ const benefits = [
 ]
 
 export default function WhyChooseUs() {
+  const [loadedImages, setLoadedImages] = useState<Record<number, boolean>>({})
+
+  const handleImageLoad = (index: number) => {
+    setLoadedImages((prev) => ({ ...prev, [index]: true }))
+  }
+
   return (
     <section className="w-full pt-20 md:py-24 xl:py-32" id="why-choose-us">
       <div className="container px-4 md:px-6 max-w-6xl mx-auto ">
@@ -51,8 +59,18 @@ export default function WhyChooseUs() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
-              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden">
-                <Image src={benefit.image || "/placeholder.svg"} alt={benefit.title} fill className="object-cover" />
+              <div className="relative w-full aspect-[4/3] rounded-lg overflow-hidden bg-muted">
+                {!loadedImages[index] && (
+                  <Skeleton className="absolute inset-0 w-full h-full" />
+                )}
+                <Image
+                  src={benefit.image || "/placeholder.svg"}
+                  alt={benefit.title}
+                  fill
+                  className={`object-cover transition-opacity duration-300 ${loadedImages[index] ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  onLoad={() => handleImageLoad(index)}
+                />
               </div>
               <h3 className="text-xl font-bold">{benefit.title}</h3>
               <p className="text-muted-foreground">{benefit.description}</p>
