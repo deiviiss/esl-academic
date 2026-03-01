@@ -1,27 +1,30 @@
 'use client'
 
+import { useState } from "react"
 import Image from "next/image"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 import { titleFont } from "@/config/fonts"
 import { motion } from "framer-motion"
+import { Skeleton } from "@/components/ui/skeleton"
 
 const principles = [
   {
-    title: "Early Language Acquisition",
-    description: "We believe in starting English education early for optimal results.",
+    title: "Psychological Foundation",
+    description: "We leverage developmental psychology to ensure English acquisition feels natural and stress-free.",
   },
   {
-    title: "Every Child's Potential",
-    description: "We recognize and nurture each child's unique ability to learn English.",
+    title: "Learning Through Play",
+    description: "Every activity is designed to be ludic and engaging, turning education into an enjoyable adventure.",
   },
   {
-    title: "Supportive Teaching Methods",
-    description: "Our engaging methods create a positive learning environment.",
+    title: "Natural Acquisition",
+    description: "We focus on intuitive learning, mirroring how children master their first language.",
   },
   {
-    title: "Creativity in Learning",
-    description: "We foster a love for learning through creative and fun activities.",
+    title: "Safe & Motivating Space",
+    description: "Our environment fosters the confidence and creativity necessary for early language mastery.",
   },
 ]
 
@@ -33,13 +36,16 @@ const strategies = [
 ]
 
 const experiences = [
-  "10+ years of ESL teaching experience",
-  "Certified TEFL instructor",
-  "Master's degree in Early Childhood Education",
-  "Published author of ESL learning materials",
+  "10+ years of experience working with children",
+  "Professional Psychologist and Psychopedagogue",
+  "Expert ESL Teacher specializing in Early Childhood",
+  "Specialist in ludic and developmental pedagogical techniques",
 ]
 
 export default function AboutPage() {
+  const [isMissionLoaded, setIsMissionLoaded] = useState(false)
+  const [isStoryLoaded, setIsStoryLoaded] = useState(false)
+
   return (
     <section className="container mx-auto px-4 py-8 max-w-7xl">
       <motion.div
@@ -68,19 +74,29 @@ export default function AboutPage() {
               academy. We believe in the transformative power of language skills in children&apos;s lives, opening doors to
               new opportunities and broadening their horizons.
             </p>
-            <Button>Learn More About Our Approach</Button>
+            <Button asChild>
+              <Link href="/#our-method">
+                Learn More About Our Approach
+              </Link>
+            </Button>
           </div>
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5 }}
+            className="relative"
           >
+            {!isMissionLoaded && (
+              <Skeleton className="absolute inset-0 w-[400px] h-[300px] rounded-lg mx-auto" />
+            )}
             <Image
               src="/imgs/29.png"
               alt="Miss Kelly teaching students"
               width={400}
               height={300}
-              className="rounded-lg mx-auto"
+              onLoad={() => setIsMissionLoaded(true)}
+              className={`rounded-lg mx-auto transition-opacity duration-300 ${isMissionLoaded ? "opacity-100" : "opacity-0"
+                }`}
             />
           </motion.div>
         </div>
@@ -93,17 +109,18 @@ export default function AboutPage() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className={`${titleFont.className} text-2xl font-bold mb-4`}>Importance of Early English Education</h2>
+        <h2 className={`${titleFont.className} text-2xl font-bold mb-4`}>Why Start Early?</h2>
         <p className="text-base mb-4">
-          Early proficiency in English significantly enhances academic performance across all subjects. In our
-          increasingly globalized world, strong language skills provide long-term benefits, preparing children for
-          future academic and professional success.
+          Learning English at a young age isn&apos;t just about mastering a language; it&apos;s about providing children with the best tools for their future. In these early stages, the brain is most receptive, making acquisition more natural, effective, and meaningful.
+        </p>
+        <p className="text-base mb-4">
+          Our methodology focuses on stimulating key areas of development, ensuring long-term benefits:
         </p>
         <ul className="list-disc list-inside text-base">
-          <li>Improved cognitive development</li>
-          <li>Enhanced problem-solving skills</li>
-          <li>Greater cultural awareness and empathy</li>
-          <li>Increased opportunities for higher education and career advancement</li>
+          <li>Enhanced memory and cognitive flexibility</li>
+          <li>Improved attention span and focus</li>
+          <li>Boosted creativity and problem-solving abilities</li>
+          <li>Greater self-confidence and cultural empathy</li>
         </ul>
       </motion.div>
 
@@ -170,24 +187,33 @@ export default function AboutPage() {
       >
         <h2 className={`${titleFont.className} text-2xl font-bold text-primary mb-5`}>Miss Kelly&apos;s Story</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-          <Image
-            src="/imgs/30.png"
-            alt="Miss Kelly"
-            width={500}
-            height={600}
-            className="rounded-lg mx-auto"
-          />
+          <div className="relative">
+            {!isStoryLoaded && (
+              <Skeleton className="absolute inset-0 w-[500px] h-[600px] rounded-lg mx-auto" />
+            )}
+            <Image
+              src="/imgs/30.png"
+              alt="Miss Kelly"
+              width={500}
+              height={600}
+              onLoad={() => setIsStoryLoaded(true)}
+              className={`rounded-lg mx-auto transition-opacity duration-300 ${isStoryLoaded ? "opacity-100" : "opacity-0"
+                }`}
+            />
+          </div>
           <div>
             <p className="text-base mb-4">
-              Miss Kelly&apos;s journey to founding the ESL Academy is rooted in her personal experiences with language
-              learning. Overcoming her own challenges in mastering a second language, she was inspired to create a
-              supportive and effective learning environment for young English learners.
+              Hello! My name is <strong>Kelly Pérez</strong>. I am a Psychologist, Psychopedagogue, and ESL Teacher with over 10 years of experience working with children.
             </p>
             <p className="text-base mb-4">
-              Her passion for education and belief in every child&apos;s potential drove her to establish an academy that not
-              only teaches English but also instills confidence and a love for learning in every student.
+              Throughout my career, I have discovered that learning English at an early age is not only possible but also far more natural and effective. As a parent, I know you want to provide your child with the best possible tools for their future.
             </p>
-            <Button variant="outline">Read Miss Kelly&apos;s Full Story</Button>
+            <p className="text-base mb-4">
+              In my academy, I combine my psychological training with pedagogical techniques and ludic activities. We offer a program where children learn through play, without pressure, in a safe and motivating environment. Every class is designed with their developmental stage and unique learning style in mind.
+            </p>
+            <p className="text-base mb-4 italic">
+              &quot;My commitment is to accompany you in this journey, providing a space where your child can learn English in a fun, loving, and effective way.&quot;
+            </p>
           </div>
         </div>
       </motion.div>
@@ -219,7 +245,6 @@ export default function AboutPage() {
             ))
           }
         </ul>
-        <Button variant="secondary">View Miss Kelly&apos;s Credentials</Button>
       </motion.div>
     </section>
   )

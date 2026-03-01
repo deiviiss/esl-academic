@@ -37,7 +37,7 @@ const getGoogleReviews = unstable_cache(
       throw new Error('Missing Google API credentials')
     }
 
-    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=rating,user_ratings_total,reviews(author_name,profile_photo_url,rating,relative_time_description,text)&key=${apiKey}`
+    const url = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=rating,user_ratings_total,reviews(author_name,profile_photo_url,rating,relative_time_description,text)&language=en&key=${apiKey}`
 
     const response = await fetch(url)
 
@@ -66,7 +66,7 @@ const getGoogleReviews = unstable_cache(
     }
   },
   ['google-reviews'],
-  { revalidate: 3600 }
+  { revalidate: 604800 }
 )
 
 export default getGoogleReviews

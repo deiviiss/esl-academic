@@ -1,6 +1,7 @@
 "use client"
 
 import { useSession } from 'next-auth/react'
+import { usePathname } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import Image from "next/image"
@@ -9,13 +10,17 @@ import { ToogleDarkMode } from '../dark-mode/toogle-dark-mode/toogle-dark-mode'
 
 export default function Header() {
   const { data: session } = useSession()
+  const pathname = usePathname()
   const isAuthenticated = !!session?.user
   const isAdmin = session?.user?.role === 'admin'
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(`${sectionId}`)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' })
+  const scrollToSection = (e: React.MouseEvent, sectionId: string | undefined) => {
+    if (pathname === '/' && sectionId) {
+      e.preventDefault()
+      const element = document.getElementById(sectionId)
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' })
+      }
     }
   }
 
@@ -33,24 +38,24 @@ export default function Header() {
               src="/logo.webp"
               alt="Miss Kelly ESL Academy"
               width={110}
-              height={0}
+              height={44}
+              className="h-auto w-[110px]"
             />
           </Link>
           <nav className="hidden md:flex gap-6">
             {[
-              { label: "Why Choose Us", href: "#why-choose-us" },
-              { label: "Our Method", href: "#our-method" },
-              { label: "Parents Love Us", href: "#why-parents-love" },
-              { label: "What They Learn", href: "#what-child-learns" },
-              { label: "Programs", href: "#services" },
-              { label: "Contact", href: "#contact" },
+              { label: "Our Method", href: "/#our-method" },
+              { label: "Parents Love Us", href: "/#why-parents-love" },
+              { label: "What They Learn", href: "/#what-child-learns" },
+              { label: "Programs", href: "/#services" },
+              { label: "About", href: "/about" },
+              { label: "Contact", href: "/#contact" },
             ].map((item) => (
-              <Link key={item.label} href={item.href}>
+              <Link key={item.label} href={item.href} onClick={(e) => scrollToSection(e, item.href.split("#")[1])}>
                 <motion.span
-                  className="text-sm font-medium text-muted-foreground hover:text-primary"
+                  className="text-sm font-medium text-muted-foreground hover:text-primary cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  onClick={() => scrollToSection(item.href.split("#")[1])}
                 >
                   {item.label}
                 </motion.span>
@@ -90,15 +95,14 @@ export default function Header() {
           {[
             { label: "Our Method", href: "/#our-method" },
             { label: "Programs", href: "/#services" },
-            { label: "About", href: "/#about" },
+            { label: "About", href: "/about" },
             { label: "Contact", href: "/#contact" },
           ].map((item) => (
-            <Link key={item.label} href={item.href}>
+            <Link key={item.label} href={item.href} onClick={(e) => scrollToSection(e, item.href.split("#")[1])}>
               <motion.span
-                className="text-sm font-medium text-muted-foreground hover:text-primary"
+                className="text-sm font-medium text-muted-foreground hover:text-primary cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => scrollToSection(item.href.split("#")[1])}
               >
                 {item.label}
               </motion.span>
