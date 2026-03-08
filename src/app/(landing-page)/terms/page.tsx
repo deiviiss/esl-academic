@@ -8,7 +8,7 @@ export default function TermsOfServicePage() {
   const lastUpdated = "March 1, 2026"
 
   return (
-    <section className="container mx-auto px-4 py-16 max-w-4xl">
+    <section className="container mx-auto px-4 md:px-6 py-16 max-w-6xl">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

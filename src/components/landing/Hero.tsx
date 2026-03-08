@@ -36,7 +36,7 @@ export default function Hero({ videoUrl }: HeroProps) {
             <div className="flex flex-col gap-5 sm:gap-3 min-[400px]:flex-row">
               <Button size="lg" asChild>
                 <motion.a
-                  href="https://wa.me/9811339839?text=Hola%20Miss%20Kelly%2C%20me%20interesa%20inscribir%20a%20mi%20hijo%2Fa."
+                  href="https://wa.me/9811755180?text=Hola%20Miss%20Kelly%2C%20me%20interesa%20inscribir%20a%20mi%20hijo%2Fa."
                   target="_blank"
                   rel="noopener noreferrer"
                   whileHover={{ scale: 1.05 }}
