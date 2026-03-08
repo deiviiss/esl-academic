@@ -5,7 +5,7 @@ import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
 import { titleFont } from "@/config/fonts"
-import { FaInstagram, FaWhatsapp } from "react-icons/fa6"
+import { FaInstagram, FaWhatsapp, FaEnvelope } from "react-icons/fa6"
 
 export default function Footer() {
   const currentYear = new Date().getFullYear()
@@ -131,7 +131,7 @@ export default function Footer() {
                 <FaInstagram className="h-5 w-5" />
               </a>
               <a
-                href="https://wa.me/9811339839"
+                href="https://wa.me/9811755180"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-muted-foreground hover:text-[#25D366] transition-colors duration-200 p-2 rounded-full bg-secondary/10 hover:bg-[#25D366]/10"
@@ -139,6 +139,14 @@ export default function Footer() {
                 title="Chat on WhatsApp"
               >
                 <FaWhatsapp className="h-5 w-5" />
+              </a>
+              <a
+                href="mailto:mskellyeslacademy@gmail.com"
+                className="text-muted-foreground hover:text-primary transition-colors duration-200 p-2 rounded-full bg-secondary/10 hover:bg-secondary/20"
+                aria-label="Send us an email"
+                title="Send Email"
+              >
+                <FaEnvelope className="h-5 w-5" />
               </a>
             </div>
           </div>

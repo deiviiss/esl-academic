@@ -47,14 +47,14 @@ export default function AboutPage() {
   const [isStoryLoaded, setIsStoryLoaded] = useState(false)
 
   return (
-    <section className="container mx-auto px-4 py-8 max-w-7xl">
+    <section className="container mx-auto px-4 md:px-6 py-16 max-w-6xl">
       <motion.div
         initial={{ opacity: 0, x: -50 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
       >
         <h1
-          className={`${titleFont.className} text-4xl font-bold text-primary mb-8`}
+          className={`${titleFont.className} text-4xl md:text-5xl font-bold text-primary mb-8`}
         >
           About Miss Kelly ESL Academy
         </h1>

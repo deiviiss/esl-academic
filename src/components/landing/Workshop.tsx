@@ -35,7 +35,7 @@ export default function Workshop() {
               className="w-fit"
             >
               <motion.a
-                href="https://wa.me/9811339839?text=Hola%20Miss%20Kelly%2C%20me%20interesa%20el%20taller%20gratuito."
+                href="https://wa.me/9811755180?text=Hola%20Miss%20Kelly%2C%20me%20interesa%20el%20taller%20gratuito."
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}

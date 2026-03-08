@@ -33,7 +33,7 @@ export default function CTA() {
           <div className="w-full max-w-sm space-y-2">
             <Button asChild className="w-full" variant="secondary">
               <motion.a
-                href="https://wa.me/9811339839?text=Hola%20Miss%20Kelly%2C%20me%20interesa%20inscribir%20a%20mi%20hijo%2Fa."
+                href="https://wa.me/9811755180?text=Hola%20Miss%20Kelly%2C%20me%20interesa%20inscribir%20a%20mi%20hijo%2Fa."
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}

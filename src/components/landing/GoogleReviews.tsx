@@ -152,7 +152,7 @@ export default function GoogleReviews() {
   }
 
   return (
-    <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/10" id="reviews">
+    <section className="w-full py-20 md:py-24 lg:py-32 bg-secondary/10 scroll-mt-10 md:scroll-mt-0" id="reviews">
       <div className="container px-4 md:px-6 max-w-6xl mx-auto">
         <motion.div
           className="flex flex-col items-center justify-center space-y-4 text-center"

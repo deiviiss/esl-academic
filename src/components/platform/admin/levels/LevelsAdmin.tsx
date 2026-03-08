@@ -90,7 +90,7 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
   }
 
   return (
-    <div className="container px-4 md:px-8 py-8 md:py-12">
+    <div className="container px-4 md:px-8 py-8 md:py-12 mx-auto">
       <motion.div
         className="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4"
         initial={{ opacity: 0, y: -20 }}
@@ -160,7 +160,57 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
 
       <motion.div variants={fadeInUp} initial="initial" animate="animate">
         <Card>
-          <div className="overflow-x-auto">
+          {/* Mobile View: Cards */}
+          <div className="md:hidden divide-y">
+            {levels.length === 0 ? (
+              <div className="px-6 py-12 text-center text-muted-foreground italic">
+                No levels found. Create one to get started.
+              </div>
+            ) : (
+              levels.map((level) => (
+                <div key={level.id} className="p-4 space-y-4">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-bold text-lg text-foreground">{level.name}</h3>
+                      <div className="flex gap-2 mt-1">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-100 text-blue-800">
+                          {level._count.newsletters} Newsletters
+                        </span>
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-green-100 text-green-800">
+                          {level._count.children} Children
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(level)}
+                        className="h-8 w-8 p-0"
+                        title="Edit"
+                      >
+                        <Edit2 className="h-4 w-4 text-blue-600" />
+                        <span className="sr-only">Edit</span>
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDelete(level.id, level.name)}
+                        className="h-8 w-8 p-0"
+                        title="Delete"
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+
+          {/* Desktop View: Table */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-muted-foreground uppercase bg-muted/50">
                 <tr>

@@ -43,24 +43,36 @@ export default function Header() {
             />
           </Link>
           <nav className="hidden md:flex gap-6">
-            {[
-              { label: "Our Method", href: "/#our-method" },
-              { label: "Parents Love Us", href: "/#why-parents-love" },
-              { label: "What They Learn", href: "/#what-child-learns" },
-              { label: "Programs", href: "/#services" },
-              { label: "About", href: "/about" },
-              { label: "Contact", href: "/#contact" },
-            ].map((item) => (
-              <Link key={item.label} href={item.href} onClick={(e) => scrollToSection(e, item.href.split("#")[1])}>
+            {pathname === '/about' ? (
+              <Link href="/">
                 <motion.span
                   className="text-sm font-medium text-muted-foreground hover:text-primary cursor-pointer"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {item.label}
+                  Back to Home
                 </motion.span>
               </Link>
-            ))}
+            ) : (
+              [
+                { label: "Our Method", href: "/#our-method" },
+                { label: "Parents Love Us", href: "/#why-parents-love" },
+                { label: "What They Learn", href: "/#what-child-learns" },
+                { label: "Programs", href: "/#services" },
+                { label: "About", href: "/about" },
+                { label: "Contact", href: "/#contact" },
+              ].map((item) => (
+                <Link key={item.label} href={item.href} onClick={(e) => scrollToSection(e, item.href.split("#")[1])}>
+                  <motion.span
+                    className="text-sm font-medium text-muted-foreground hover:text-primary cursor-pointer"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {item.label}
+                  </motion.span>
+                </Link>
+              ))
+            )}
           </nav>
           <div className='flex items-center gap-3'>
             < ToogleDarkMode />
@@ -92,22 +104,34 @@ export default function Header() {
           </div>
         </div>
         <nav className="flex md:hidden gap-6">
-          {[
-            { label: "Our Method", href: "/#our-method" },
-            { label: "Programs", href: "/#services" },
-            { label: "About", href: "/about" },
-            { label: "Contact", href: "/#contact" },
-          ].map((item) => (
-            <Link key={item.label} href={item.href} onClick={(e) => scrollToSection(e, item.href.split("#")[1])}>
+          {pathname === '/about' ? (
+            <Link href="/">
               <motion.span
                 className="text-sm font-medium text-muted-foreground hover:text-primary cursor-pointer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                {item.label}
+                Back to Home
               </motion.span>
             </Link>
-          ))}
+          ) : (
+            [
+              { label: "Our Method", href: "/#our-method" },
+              { label: "Programs", href: "/#services" },
+              { label: "About", href: "/about" },
+              { label: "Contact", href: "/#contact" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href} onClick={(e) => scrollToSection(e, item.href.split("#")[1])}>
+                <motion.span
+                  className="text-sm font-medium text-muted-foreground hover:text-primary cursor-pointer"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  {item.label}
+                </motion.span>
+              </Link>
+            ))
+          )}
         </nav>
       </div>
     </motion.header>
