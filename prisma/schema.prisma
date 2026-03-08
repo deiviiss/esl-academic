@@ -126,13 +126,26 @@ model Newsletter {
   forParents ForParents[]
   levels     Level[]
 
-  vocabularies Vocabulary[]
-  videos       Video[]
-  playlist     Playlist?
+  vocabularySets VocabularySet[]
+  videos         Video[]
+  playlist       Playlist?
 
   createdAt DateTime @default(now())
 
   @@map("newsletters")
+}
+
+model VocabularySet {
+  id           String     @id @default(uuid())
+  name         String
+  newsletterId String
+  newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+
+  images VocabularyImage[]
+
+  createdAt DateTime @default(now())
+
+  @@map("vocabulary_sets")
 }
 
 model ForParents {
@@ -144,25 +157,32 @@ model ForParents {
   newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
 }
 
-model Vocabulary {
-  id            String @id @default(uuid())
-  word          String
-  pronunciation String
-  imageUrl      String
+model VocabularyImage {
+  id    String        @id @default(uuid())
+  setId String
+  set   VocabularySet @relation(fields: [setId], references: [id])
 
-  newsletterId String
-  newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+  imageUrl String
+  fileName String
+  order    Int
 
-  @@map("vocabularies")
+  createdAt DateTime @default(now())
+
+  @@map("vocabulary_images")
 }
 
 model Video {
   id           String     @id @default(uuid())
   newsletterId String
-  title        String
-  videoUrl     String
-  thumbnailUrl String?
   newsletter   Newsletter @relation(fields: [newsletterId], references: [id])
+
+  videoUrl     String
+  fileName     String
+  title        String
+  thumbnailUrl String?
+  order        Int
+
+  createdAt DateTime @default(now())
 
   @@map("videos")
 }

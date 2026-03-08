@@ -5,10 +5,10 @@ import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Calendar, Edit, Trash2, Plus } from "lucide-react"
-import { toast } from "sonner"
 import Link from "next/link"
 import { NewsletterListItem } from "@/interfaces/newsletter.interface"
 import { deleteNewsletter } from "@/actions/newsletters/newsletter.actions"
+import { noticeSuccess, noticeFailure, noticeWarning } from "@/components/toast-notifications/ToastNotifications"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -21,20 +21,25 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
   const [deletingId, setDeletingId] = useState<string | null>(null)
 
   const handleDelete = async (id: string, title: string) => {
-    if (!confirm(`Are you sure you want to delete the newsletter "${title}"? This action cannot be undone.`)) {
-      return
-    }
+    noticeWarning(
+      `Delete "${title}"?`,
+      "This will permanently remove the newsletter and all its files.",
+      {
+        label: "Delete",
+        onClick: async () => {
+          setDeletingId(id)
+          const result = await deleteNewsletter(id)
 
-    setDeletingId(id)
-    const result = await deleteNewsletter(id)
-
-    if (result.ok) {
-      toast.success("Newsletter deleted successfully")
-      router.refresh()
-    } else {
-      toast.error(result.message || "Error deleting newsletter")
-      setDeletingId(null)
-    }
+          if (result.ok) {
+            noticeSuccess("Newsletter deleted successfully")
+            router.refresh()
+          } else {
+            noticeFailure(result.message || "Error deleting newsletter")
+            setDeletingId(null)
+          }
+        }
+      }
+    )
   }
 
   const fadeInUp = {

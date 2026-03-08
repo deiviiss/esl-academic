@@ -111,11 +111,11 @@
 //   doc.save(filename)
 // }
 import { jsPDF } from "jspdf"
-import { VocabularyItem } from "@/interfaces/newsletter.interface"
+import { VocabularySet } from "@/interfaces/newsletter.interface"
 
 export const generateVocabularyPDF = async (
-  vocabularies: VocabularyItem[],
-  title: string,
+  set: VocabularySet,
+  newsletterTitle: string,
   dateStr: string
 ) => {
   const doc = new jsPDF({
@@ -127,14 +127,14 @@ export const generateVocabularyPDF = async (
   const pageWidth = doc.internal.pageSize.getWidth()
   const pageHeight = doc.internal.pageSize.getHeight()
 
-  const margin = 4
-  const gap = 2
+  const margin = 10
+  const gap = 5
 
   const cols = 2
   const rows = 2
 
   const cellWidth = (pageWidth - margin * 2 - gap) / cols
-  const cellHeight = (pageHeight - margin * 2 - gap - 22) / rows
+  const cellHeight = (pageHeight - margin * 2 - gap - 25) / rows
 
   const loadImage = (url: string): Promise<string> =>
     new Promise((resolve, reject) => {
@@ -154,86 +154,68 @@ export const generateVocabularyPDF = async (
     })
 
   const drawHeader = () => {
-    doc.setFontSize(14)
+    doc.setFontSize(16)
     doc.setTextColor(41, 37, 36)
-    doc.text("Vocabulary List", margin, margin + 10)
+    doc.text(`${newsletterTitle} - ${set.name}`, margin, margin + 10)
 
-    doc.setFontSize(12)
+    doc.setFontSize(11)
     doc.setTextColor(120, 113, 108)
-    doc.text(`${title} - ${dateStr}`, margin, margin + 17)
+    doc.text(`Vocabulary Set - ${dateStr}`, margin, margin + 17)
 
     doc.setDrawColor(231, 229, 228)
-    doc.line(margin, margin + 20, pageWidth - margin, margin + 20)
+    doc.line(margin, margin + 21, pageWidth - margin, margin + 21)
   }
 
   drawHeader()
 
+  // Sort images by order
+  const sortedImages = [...set.images].sort((a, b) => a.order - b.order)
   let currentItem = 0
 
-  for (let i = 0; i < vocabularies.length; i++) {
+  for (let i = 0; i < sortedImages.length; i++) {
     if (i > 0 && i % (cols * rows) === 0) {
       doc.addPage()
       drawHeader()
       currentItem = 0
     }
 
-    const vocab = vocabularies[i]
+    const image = sortedImages[i]
     const col = currentItem % cols
     const row = Math.floor(currentItem / cols)
 
     const x = margin + col * (cellWidth + gap)
-    const y = margin + 23 + row * (cellHeight + gap)
+    const y = margin + 25 + row * (cellHeight + gap)
 
     doc.setDrawColor(231, 229, 228)
     doc.roundedRect(x, y, cellWidth, cellHeight, 3, 3)
 
     // IMAGE 
     try {
-      if (vocab.imageUrl) {
-        const isFullUrl = vocab.imageUrl.startsWith("http") || vocab.imageUrl.startsWith("/") || vocab.imageUrl.startsWith("data:")
+      if (image.imageUrl) {
+        const isFullUrl = image.imageUrl.startsWith("http") || image.imageUrl.startsWith("/") || image.imageUrl.startsWith("data:")
         const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME
-        const imageUrl = isFullUrl ? vocab.imageUrl : `https://res.cloudinary.com/${cloudName}/image/upload/${vocab.imageUrl}`
+        const imageUrl = isFullUrl ? image.imageUrl : `https://res.cloudinary.com/${cloudName}/image/upload/${image.imageUrl}`
 
-        const img = await loadImage(imageUrl)
-        const imgSize = Math.min(cellWidth - 8, cellHeight - 40)
-        const imgX = x + (cellWidth - imgSize) / 2
-        const imgY = y + 4
+        const imgData = await loadImage(imageUrl)
 
-        doc.addImage(img, "JPEG", imgX, imgY, imgSize, imgSize)
+        // Use more of the cell since no text is needed
+        const imgPadding = 4
+        const maxImgWidth = cellWidth - imgPadding * 2
+        const maxImgHeight = cellHeight - imgPadding * 2
+
+        doc.addImage(imgData, "JPEG", x + imgPadding, y + imgPadding, maxImgWidth, maxImgHeight, undefined, 'FAST')
       }
-    } catch {
+    } catch (error) {
+      console.error("Error loading image for PDF:", error)
       doc.setFontSize(9)
       doc.text("Image not available", x + cellWidth / 2, y + cellHeight / 2, {
         align: "center",
       })
     }
 
-    // WORD
-    doc.setFont("helvetica", "bold")
-    doc.setFontSize(10)
-    doc.setTextColor(41, 37, 36)
-    doc.text(
-      vocab.word,
-      x + cellWidth / 4,
-      y + cellHeight - 20,
-      { align: "right" }
-    )
-
-    // TRANSLATION / MEANING
-    // if (vocab.pronunciation) {
-    //   doc.setFont("helvetica", "normal")
-    //   doc.setFontSize(8)
-    //   doc.setTextColor(120, 113, 108)
-    //   doc.text(
-    //     vocab.pronunciation,
-    //     x + cellWidth / 2,
-    //     y + cellHeight - 7,
-    //     { align: "right" }
-    //   )
-    // }
-
     currentItem++
   }
 
-  doc.save(`Vocabulary-${dateStr.replace(/\s+/g, "-")}.pdf`)
+  const safeSetName = set.name.replace(/\s+/g, "-")
+  doc.save(`Vocabulary-${safeSetName}-${dateStr.replace(/\s+/g, "-")}.pdf`)
 }

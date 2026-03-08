@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { deleteCloudinaryResources } from '@/lib/cloudinary'
 
 /**
  * Fetches all newsletters associated with a specific level, ordered by year and month descending.
@@ -25,7 +26,7 @@ export const getNewslettersByLevel = async (levelId: string) => {
     })
 
     return newsletters
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching newsletters by level:', error)
     return []
   }
@@ -47,7 +48,7 @@ export const getAllNewsletters = async () => {
     })
 
     return newsletters
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error fetching all newsletters:', error)
     return []
   }
@@ -61,7 +62,15 @@ export const getNewsletterById = async (id: string) => {
     const newsletter = await prisma.newsletter.findUnique({
       where: { id },
       include: {
-        vocabularies: true,
+        vocabularySets: {
+          include: {
+            images: {
+              orderBy: {
+                order: 'asc'
+              }
+            }
+          }
+        },
         videos: true,
         levels: true,
         forParents: true,
@@ -88,8 +97,11 @@ export const createNewsletter = async (data: {
   month: Date
   year: number
   levelIds: string[]
-  vocabularies?: Array<{ word: string; pronunciation: string; imageUrl: string }>
-  videos?: Array<{ title: string; videoUrl: string; thumbnailUrl?: string }>
+  vocabularySets?: Array<{
+    name: string
+    images: Array<{ id?: string; imageUrl: string; fileName: string; order: number }>
+  }>
+  videos?: Array<{ id?: string; title: string; videoUrl: string; fileName: string; thumbnailUrl?: string; order: number }>
   forParents?: Array<{ message: string; documentUrl?: string }>
   playlist?: {
     title?: string
@@ -106,29 +118,62 @@ export const createNewsletter = async (data: {
         levels: {
           connect: data.levelIds.map(id => ({ id }))
         },
-        vocabularies: data.vocabularies ? {
-          create: data.vocabularies
+        vocabularySets: data.vocabularySets ? {
+          create: data.vocabularySets.map(set => ({
+            name: set.name,
+            images: {
+              create: set.images.map(img => ({
+                imageUrl: img.imageUrl,
+                fileName: img.fileName,
+                order: img.order
+              }))
+            }
+          }))
         } : undefined,
         videos: data.videos ? {
-          create: data.videos
+          create: data.videos.map(v => ({
+            title: v.title,
+            videoUrl: v.videoUrl,
+            fileName: v.fileName,
+            thumbnailUrl: v.thumbnailUrl,
+            order: v.order
+          }))
         } : undefined,
         forParents: data.forParents ? {
-          create: data.forParents
+          create: data.forParents.map(f => ({
+            message: f.message,
+            documentUrl: f.documentUrl
+          }))
         } : undefined,
         playlist: data.playlist ? {
           create: {
             title: data.playlist.title,
             url: data.playlist.url,
             links: data.playlist.links ? {
-              create: data.playlist.links
+              create: data.playlist.links.map(l => ({
+                title: l.title,
+                url: l.url
+              }))
             } : undefined
           }
         } : undefined
       },
       include: {
         levels: true,
-        vocabularies: true,
-        videos: true,
+        vocabularySets: {
+          include: {
+            images: {
+              orderBy: {
+                order: 'asc'
+              }
+            }
+          }
+        },
+        videos: {
+          orderBy: {
+            order: 'asc'
+          }
+        },
         forParents: true,
         playlist: {
           include: {
@@ -139,7 +184,7 @@ export const createNewsletter = async (data: {
     })
 
     return { ok: true, newsletter }
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error creating newsletter:', error)
     return { ok: false, message: 'Failed to create newsletter' }
   }
@@ -156,9 +201,12 @@ export const updateNewsletter = async (
     month: Date
     year: number
     levelIds: string[]
-    vocabularies?: Array<{ word: string; pronunciation: string; imageUrl: string }>
-    videos?: Array<{ title: string; videoUrl: string; thumbnailUrl?: string }>
-    forParents?: Array<{ message: string; documentUrl?: string }>
+    vocabularySets?: Array<{
+      name: string
+      images: Array<{ id?: string; imageUrl: string; fileName: string; order: number }>
+    }>
+    videos?: Array<{ id?: string; title: string; videoUrl: string; fileName: string; thumbnailUrl?: string; order: number }>
+    forParents?: Array<{ id?: string; message: string; documentUrl?: string }>
     playlist?: {
       title?: string
       url?: string
@@ -171,8 +219,32 @@ export const updateNewsletter = async (
     console.log('DATA:', JSON.stringify(data, null, 2))
     // Use transaction to ensure atomicity
     const newsletter = await prisma.$transaction(async (tx) => {
+      // 1. Fetch current assets to identify orphaned ones later
+      const existingSets = await tx.vocabularySet.findMany({
+        where: { newsletterId: id },
+        include: { images: true }
+      })
+      const existingVideos = await tx.video.findMany({
+        where: { newsletterId: id }
+      })
+
+      const oldImagePublicIds = existingSets.flatMap(s => s.images.map(img => img.imageUrl))
+      const oldVideoPublicIds = existingVideos.map(v => v.videoUrl)
+
+      // Get new public IDs from payload
+      const newImagePublicIds = data.vocabularySets?.flatMap(s => s.images.map(img => img.imageUrl)) || []
+      const newVideoPublicIds = data.videos?.map(v => v.videoUrl) || []
+
+      // Identify orphaned (old ones not in new ones)
+      const orphanedImages = oldImagePublicIds.filter(publicId => !newImagePublicIds.includes(publicId))
+      const orphanedVideos = oldVideoPublicIds.filter(publicId => !newVideoPublicIds.includes(publicId))
+
       // Delete existing nested relations
-      await tx.vocabulary.deleteMany({ where: { newsletterId: id } })
+      for (const set of existingSets) {
+        await tx.vocabularyImage.deleteMany({ where: { setId: set.id } })
+      }
+      await tx.vocabularySet.deleteMany({ where: { newsletterId: id } })
+
       await tx.video.deleteMany({ where: { newsletterId: id } })
       await tx.forParents.deleteMany({ where: { newsletterId: id } })
 
@@ -186,7 +258,7 @@ export const updateNewsletter = async (
       }
 
       // Update newsletter with new data
-      return await tx.newsletter.update({
+      const updatedNewsletter = await tx.newsletter.update({
         where: { id },
         data: {
           title: data.title,
@@ -195,14 +267,32 @@ export const updateNewsletter = async (
           levels: {
             set: data.levelIds.map(levelId => ({ id: levelId }))
           },
-          vocabularies: data.vocabularies ? {
-            create: data.vocabularies
+          vocabularySets: data.vocabularySets ? {
+            create: data.vocabularySets.map(set => ({
+              name: set.name,
+              images: {
+                create: set.images.map(img => ({
+                  imageUrl: img.imageUrl,
+                  fileName: img.fileName,
+                  order: img.order
+                }))
+              }
+            }))
           } : undefined,
           videos: data.videos ? {
-            create: data.videos
+            create: data.videos.map(v => ({
+              title: v.title,
+              videoUrl: v.videoUrl,
+              fileName: v.fileName,
+              thumbnailUrl: v.thumbnailUrl,
+              order: v.order
+            }))
           } : undefined,
           forParents: data.forParents ? {
-            create: data.forParents
+            create: data.forParents.map(f => ({
+              message: f.message,
+              documentUrl: f.documentUrl
+            }))
           } : undefined,
           playlist: data.playlist ? {
             create: {
@@ -216,8 +306,20 @@ export const updateNewsletter = async (
         },
         include: {
           levels: true,
-          vocabularies: true,
-          videos: true,
+          vocabularySets: {
+            include: {
+              images: {
+                orderBy: {
+                  order: 'asc'
+                }
+              }
+            }
+          },
+          videos: {
+            orderBy: {
+              order: 'asc'
+            }
+          },
           forParents: true,
           playlist: {
             include: {
@@ -226,14 +328,21 @@ export const updateNewsletter = async (
           }
         }
       })
+
+      // 4. Delete from Cloudinary (Orphaned assets)
+      if (orphanedImages.length > 0) {
+        await deleteCloudinaryResources(orphanedImages, 'image')
+      }
+      if (orphanedVideos.length > 0) {
+        await deleteCloudinaryResources(orphanedVideos, 'video')
+      }
+
+      return updatedNewsletter
     })
 
     return { ok: true, newsletter }
-  } catch (error) {
-    console.log('AN ERROR OCCURRED DURING UPDATE')
-    if (error && typeof error === 'object') {
-      console.log('ERROR MESSAGE:', error || 'No message')
-    }
+  } catch (error: unknown) {
+    console.log('AN ERROR OCCURRED DURING UPDATE', error)
     return { ok: false, message: 'Failed to update newsletter' }
   }
 }
@@ -244,8 +353,23 @@ export const updateNewsletter = async (
 export const deleteNewsletter = async (id: string) => {
   try {
     await prisma.$transaction(async (tx) => {
-      // Delete existing nested relations
-      await tx.vocabulary.deleteMany({ where: { newsletterId: id } })
+      // 1. Fetch all assets to delete from Cloudinary
+      const existingSets = await tx.vocabularySet.findMany({
+        where: { newsletterId: id },
+        include: { images: true }
+      })
+      const existingVideos = await tx.video.findMany({
+        where: { newsletterId: id }
+      })
+
+      const imagePublicIds = existingSets.flatMap(s => s.images.map(img => img.imageUrl))
+      const videoPublicIds = existingVideos.map(v => v.videoUrl)
+
+      // 2. Delete existing nested relations in DB
+      for (const set of existingSets) {
+        await tx.vocabularyImage.deleteMany({ where: { setId: set.id } })
+      }
+      await tx.vocabularySet.deleteMany({ where: { newsletterId: id } })
       await tx.video.deleteMany({ where: { newsletterId: id } })
       await tx.forParents.deleteMany({ where: { newsletterId: id } })
 
@@ -258,17 +382,23 @@ export const deleteNewsletter = async (id: string) => {
         await tx.playlist.delete({ where: { id: existingPlaylist.id } })
       }
 
+      // 3. Delete newsletter
       await tx.newsletter.delete({
         where: { id }
       })
+
+      // 4. Delete from Cloudinary (Only if DB deletion succeeded)
+      if (imagePublicIds.length > 0) {
+        await deleteCloudinaryResources(imagePublicIds, 'image')
+      }
+      if (videoPublicIds.length > 0) {
+        await deleteCloudinaryResources(videoPublicIds, 'video')
+      }
     })
 
     return { ok: true }
-  } catch (error) {
-    console.log('AN ERROR OCCURRED DURING DELETE')
-    if (error && typeof error === 'object') {
-      console.log('ERROR MESSAGE:', error || 'No message')
-    }
+  } catch (error: unknown) {
+    console.log('AN ERROR OCCURRED DURING DELETE', error)
     return { ok: false, message: 'Failed to delete newsletter' }
   }
 }

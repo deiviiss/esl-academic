@@ -83,46 +83,68 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
               </TabsTrigger>
             </TabsList>
 
-            {/* Vocabulary */}
+            {/* Vocabulary Sets */}
             <TabsContent value="vocabulary" className="mt-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center text-primary">
-                    <Book className="h-5 w-5 mr-2" />
-                    What We&apos;re Learning
-                  </CardTitle>
-                  <CardDescription>Practice these words and their pronunciation at home</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 gap-6">
-                    {newsletter.vocabularies.map((vocab) => (
-                      <div key={vocab.id} className="flex flex-col border rounded-2xl hover:border-primary transition-all bg-card shadow-md overflow-hidden group">
-                        <div className="relative aspect-square w-full bg-muted overflow-hidden border-b">
-                          {vocab.imageUrl ? (
-                            <CloudinaryImage
-                              src={vocab.imageUrl}
-                              alt={vocab.word}
-                              fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-105"
-                            />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                              <Book className="h-12 w-12 opacity-20" />
-                            </div>
-                          )}
-                        </div>
-                        <div className="p-4 flex flex-col items-center justify-center text-center">
-                          <p className="font-bold text-xl text-primary group-hover:text-primary/80 transition-colors uppercase tracking-tight">{vocab.word}</p>
-                          <p className="text-sm text-muted-foreground font-medium italic">/{vocab.pronunciation}/</p>
-                        </div>
+              <div className="space-y-8">
+                {newsletter.vocabularySets.map((set) => (
+                  <Card key={set.id} className="overflow-hidden border-primary/10 shadow-sm">
+                    <CardHeader className="bg-primary/5 flex flex-row items-center justify-between py-4">
+                      <div>
+                        <CardTitle className="text-xl text-primary flex items-center">
+                          <Book className="h-5 w-5 mr-2" />
+                          {set.name}
+                        </CardTitle>
+                        <CardDescription>{set.images.length} images in this set</CardDescription>
                       </div>
-                    ))}
-                    {newsletter.vocabularies.length === 0 && (
-                      <p className="text-muted-foreground italic col-span-2 text-center py-4">No vocabulary words listed for this month.</p>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="gap-2 border-primary/20 hover:bg-primary/10"
+                        onClick={async () => {
+                          try {
+                            setIsGeneratingPDF(true)
+                            await generateVocabularyPDF(set, newsletter.title, formattedDate)
+                            toast.success(`PDF for ${set.name} generated!`)
+                          } catch (error) {
+                            console.error("PDF generation error:", error)
+                            toast.error("Failed to generate PDF")
+                          } finally {
+                            setIsGeneratingPDF(false)
+                          }
+                        }}
+                        disabled={isGeneratingPDF}
+                      >
+                        <Download className="h-4 w-4" />
+                        <span className="hidden sm:inline">Download PDF</span>
+                      </Button>
+                    </CardHeader>
+                    <CardContent className="pt-6">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                        {set.images.map((img) => (
+                          <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border bg-muted shadow-sm hover:shadow-md transition-all">
+                            <CloudinaryImage
+                              src={img.imageUrl}
+                              alt={img.fileName}
+                              fill
+                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <p className="text-[10px] text-white text-center truncate">{img.fileName}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+                {newsletter.vocabularySets.length === 0 && (
+                  <Card>
+                    <CardContent className="py-12 text-center text-muted-foreground italic">
+                      No vocabulary sets listed for this month.
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
             </TabsContent>
 
             {/* Videos  */}
@@ -285,7 +307,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                 <span className="text-muted-foreground flex items-center">
                   <Book className="h-4 w-4 mr-2" /> Vocabulary
                 </span>
-                <span className="font-bold">{newsletter.vocabularies.length} words</span>
+                <span className="font-bold">{newsletter.vocabularySets.length} sets</span>
               </div>
               <div className="flex justify-between items-center text-sm border-b pb-2">
                 <span className="text-muted-foreground flex items-center">
@@ -300,28 +322,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
                 <span className="font-bold">{newsletter.playlist?.links.length || 0} links</span>
               </div>
 
-              {newsletter.vocabularies.length > 0 && (
-                <Button
-                  variant="outline"
-                  className="w-full mt-2 gap-2 border-primary/20 hover:bg-primary/5"
-                  onClick={async () => {
-                    setIsGeneratingPDF(true)
-                    try {
-                      await generateVocabularyPDF(newsletter.vocabularies, newsletter.title, formattedDate)
-                      toast.success("PDF generated successfully!")
-                    } catch (error) {
-                      console.error("PDF generation error:", error)
-                      toast.error("Failed to generate PDF")
-                    } finally {
-                      setIsGeneratingPDF(false)
-                    }
-                  }}
-                  disabled={isGeneratingPDF}
-                >
-                  <Download className={`h-4 w-4 text-primary ${isGeneratingPDF ? "animate-bounce" : ""}`} />
-                  {isGeneratingPDF ? "Generating PDF..." : "Download Vocabulary PDF"}
-                </Button>
-              )}
+              {/* PDF button removed from here as it is now per set */}
 
               <Button variant="default" className="w-full mt-4" asChild>
                 <Link href="/platform/academy/newsletters">

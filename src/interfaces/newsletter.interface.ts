@@ -9,18 +9,26 @@ export interface NewsletterListItem {
   createdAt: Date | string
 }
 
-export interface VocabularyItem {
+export interface VocabularyImage {
   id: string
-  word: string
-  pronunciation: string
   imageUrl: string
+  fileName: string
+  order: number
+}
+
+export interface VocabularySet {
+  id: string
+  name: string
+  images: VocabularyImage[]
 }
 
 export interface VideoItem {
   id: string
   title: string
   videoUrl: string
+  fileName: string
   thumbnailUrl?: string | null
+  order: number
 }
 
 export interface PlaylistLinkItem {
@@ -48,7 +56,7 @@ export interface NewsletterDetailData {
   month: Date | string
   year: number
 
-  vocabularies: VocabularyItem[]
+  vocabularySets: VocabularySet[]
   videos: VideoItem[]
   playlist: PlaylistData | null;
   forParents: ForParentsData[];
@@ -60,8 +68,20 @@ export interface NewsletterData {
   month: Date | string
   year: number
   levels: Level[]
-  vocabularies: VocabularyItem[]
+  vocabularySets: VocabularySet[]
   videos: VideoItem[]
   playlist: PlaylistData | null
   forParents: ForParentsData[]
+}
+
+export interface CloudinaryUploadWidgetInfo {
+  public_id: string
+  format: string
+  original_filename: string
+  [key: string]: unknown
+}
+
+export interface CloudinaryUploadWidgetResults {
+  info?: string | CloudinaryUploadWidgetInfo
+  event?: string
 }
