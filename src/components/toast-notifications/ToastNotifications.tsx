@@ -20,7 +20,7 @@ export const noticeWarning = (message: string, description?: string, action?: { 
   toast(message, {
     description,
     position: 'top-right',
-    className: 'bg-amber-500 text-white border-none shadow-lg',
+    className: 'bg-primary text-white border-none',
     action: action ? {
       label: action.label,
       onClick: action.onClick,
