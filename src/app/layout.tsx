@@ -43,7 +43,17 @@ export default function RootLayout({
       >
         <Providers>
           {children}
-          <Toaster />
+          <Toaster
+            position="top-right"
+            expand={false}
+            richColors
+            toastOptions={{
+              style: {
+                borderRadius: '1rem',
+              },
+              className: 'font-sans',
+            }}
+          />
         </Providers>
       </body>
     </html >

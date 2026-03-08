@@ -6,35 +6,41 @@ import { motion } from "framer-motion"
 import { CldUploadWidget, CldImage } from "next-cloudinary"
 import { CloudinaryImage } from "@/components/platform/CloudinaryImage"
 import { getCloudinaryVideoThumbnail } from "@/utils/cloudinary.utils"
-import { toast } from "sonner"
+import { noticeSuccess, noticeFailure, noticeWarning } from "@/components/toast-notifications/ToastNotifications"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, X, Play, Save, Video } from "lucide-react"
 import { createNewsletter, updateNewsletter } from "@/actions/newsletters/newsletter.actions"
-import { NewsletterData } from "@/interfaces/newsletter.interface"
+import { NewsletterData, VideoItem, VocabularySet, VocabularyImage } from "@/interfaces/newsletter.interface"
 import { Textarea } from "@/components/ui/textarea"
+
+function humanizeFileName(fileName: string) {
+  return fileName
+    .split(".")[0]
+    .split(/[-_]/)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+}
+
+function slugify(text: string) {
+  return text
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, "")
+    .replace(/[\s_-]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+}
 
 interface NewsletterFormProps {
   newsletter?: NewsletterData
   levels: Array<{ id: string; name: string }>
 }
 
-interface VocabularyItem {
-  word: string
-  pronunciation: string
-  imageUrl: string
-}
-
-interface VideoItem {
-  title: string
-  videoUrl: string
-  thumbnailUrl?: string | null
-}
-
 interface ForParentsItem {
+  id?: string
   message: string
   documentUrl?: string | null
 }
@@ -50,7 +56,6 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
 
   // Basic fields
   const [title, setTitle] = useState(newsletter?.title || "")
-  // month stores "1" to "12"
   const [month, setMonth] = useState(
     newsletter?.month ? (new Date(newsletter.month).getUTCMonth() + 1).toString() : (new Date().getMonth() + 1).toString()
   )
@@ -75,11 +80,14 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   )
 
   // Dynamic lists
-  const [vocabularies, setVocabularies] = useState<VocabularyItem[]>(
-    newsletter?.vocabularies || []
+  const [vocabularySets, setVocabularySets] = useState<VocabularySet[]>(
+    newsletter?.vocabularySets || []
   )
   const [videos, setVideos] = useState<VideoItem[]>(
-    newsletter?.videos ? newsletter.videos.map(v => ({ ...v, thumbnailUrl: v.thumbnailUrl ?? null })) : []
+    newsletter?.videos ? newsletter.videos.map(v => ({
+      ...v,
+      thumbnailUrl: v.thumbnailUrl || null
+    })) : []
   )
   const [forParents, setForParents] = useState<ForParentsItem[]>(
     newsletter?.forParents ? newsletter.forParents.map(f => ({ ...f, documentUrl: f.documentUrl ?? null })) : []
@@ -92,19 +100,14 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
 
   // Fix for next-cloudinary scroll lock issue
   useEffect(() => {
-    // Ensuring body scroll is always enabled when the form is active
-    // This counters the 'overflow: hidden' bug from Cloudinary widget
     const handleScrollReset = () => {
       if (document.body.style.overflow === "hidden") {
         document.body.style.overflow = "auto"
       }
     }
-
     handleScrollReset()
-
-    // Also reset on any state change that might cause a re-render
     return () => handleScrollReset()
-  }, [vocabularies, videos])
+  }, [vocabularySets, videos])
 
   const handleLevelToggle = (levelId: string) => {
     setSelectedLevels(prev =>
@@ -114,32 +117,68 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
     )
   }
 
-  const addVocabulary = () => {
-    setVocabularies([...vocabularies, { word: "", pronunciation: "", imageUrl: "" }])
+  const addVocabularySet = () => {
+    const newSet: VocabularySet = {
+      id: crypto.randomUUID(),
+      name: "",
+      images: []
+    }
+    setVocabularySets([...vocabularySets, newSet])
   }
 
-  const removeVocabulary = (index: number) => {
-    setVocabularies(vocabularies.filter((_, i) => i !== index))
+  const updateVocabularySetName = (index: number, name: string) => {
+    const updated = [...vocabularySets]
+    updated[index].name = name
+    setVocabularySets(updated)
   }
 
-  const updateVocabulary = (index: number, field: keyof VocabularyItem, value: string) => {
-    const updated = [...vocabularies]
-    updated[index][field] = value
-    setVocabularies(updated)
+  const removeVocabularySet = (index: number) => {
+    const setName = vocabularySets[index].name || "this set"
+    noticeWarning(
+      `Remove "${setName}"?`,
+      "Any images uploaded to this set will be removed from the form.",
+      {
+        label: "Remove",
+        onClick: () => setVocabularySets(prev => prev.filter((_, i) => i !== index))
+      }
+    )
   }
 
-  const addVideo = () => {
-    setVideos([...videos, { title: "", videoUrl: "", thumbnailUrl: "" }])
+  const removeVocabularyImage = (setIndex: number, imgIndex: number) => {
+    const updated = [...vocabularySets]
+    updated[setIndex].images = updated[setIndex].images.filter((_, i) => i !== imgIndex)
+    // Re-order images
+    updated[setIndex].images = updated[setIndex].images.map((img, i) => ({ ...img, order: i }))
+    setVocabularySets(updated)
+  }
+
+  const addVideo = (newVideo: VideoItem) => {
+    setVideos(prev => [...prev, newVideo])
   }
 
   const removeVideo = (index: number) => {
-    setVideos(videos.filter((_, i) => i !== index))
+    const videoTitle = videos[index].title || "this video"
+    noticeWarning(
+      `Remove "${videoTitle}"?`,
+      undefined,
+      {
+        label: "Remove",
+        onClick: () => setVideos(prev => prev.filter((_, i) => i !== index))
+      }
+    )
   }
 
-  const updateVideo = (index: number, field: keyof VideoItem, value: string) => {
-    const updated = [...videos]
-    updated[index][field] = value
-    setVideos(updated)
+  const addVocabularyImage = (setIndex: number, newImage: VocabularyImage) => {
+    setVocabularySets(prev => {
+      const updated = [...prev]
+      if (updated[setIndex]) {
+        updated[setIndex] = {
+          ...updated[setIndex],
+          images: [...updated[setIndex].images, newImage]
+        }
+      }
+      return updated
+    })
   }
 
   const addForParents = () => {
@@ -174,31 +213,39 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
     e.preventDefault()
 
     if (!title || !month || !year || selectedLevels.length === 0) {
-      toast.error("Please complete all required fields: Title, Month, Year and at least one Level.")
+      noticeFailure("Please complete all required fields: Title, Month, Year and at least one Level.")
       return
     }
 
     setIsSubmitting(true)
 
-    // Create date at midnight UTC for the 1st of the month
-    const monthDate = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1))
+    const fullDate = new Date(Date.UTC(parseInt(year), parseInt(month) - 1, 1))
 
-    const data = {
+    const payload = {
       title,
-      month: monthDate,
+      month: fullDate,
       year: parseInt(year),
       levelIds: selectedLevels,
-      vocabularies: vocabularies.filter(v => v.word && v.pronunciation && v.imageUrl).map(v => ({
-        word: v.word,
-        pronunciation: v.pronunciation,
-        imageUrl: v.imageUrl
+      vocabularySets: vocabularySets.filter(s => s.name && s.images.length > 0).map(s => ({
+        id: s.id,
+        name: s.name,
+        images: s.images.map(img => ({
+          id: img.id,
+          imageUrl: img.imageUrl,
+          fileName: img.fileName,
+          order: img.order
+        }))
       })),
-      videos: videos.filter(v => v.title && v.videoUrl).map(v => ({
+      videos: videos.filter(v => v.title && v.videoUrl).map((v, index) => ({
+        id: v.id,
         title: v.title,
         videoUrl: v.videoUrl,
-        thumbnailUrl: v.thumbnailUrl || undefined
+        fileName: v.fileName,
+        thumbnailUrl: v.thumbnailUrl || undefined,
+        order: index
       })),
       forParents: forParents.filter(f => f.message).map(f => ({
+        id: f.id,
         message: f.message,
         documentUrl: f.documentUrl || undefined
       })),
@@ -213,15 +260,15 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
     }
 
     const result = newsletter
-      ? await updateNewsletter(newsletter.id, data)
-      : await createNewsletter(data)
+      ? await updateNewsletter(newsletter.id, payload)
+      : await createNewsletter(payload)
 
     if (result.ok) {
-      toast.success(newsletter ? "Newsletter updated successfully" : "Newsletter created successfully")
+      noticeSuccess(newsletter ? "Newsletter updated successfully" : "Newsletter created successfully")
       router.push("/platform/admin/newsletters")
       router.refresh()
     } else {
-      toast.error(result.message || "Error saving newsletter")
+      noticeFailure(result.message || "Error saving newsletter")
       setIsSubmitting(false)
     }
   }
@@ -329,92 +376,125 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
           </Card>
         </motion.div>
 
-        {/* Vocabulary */}
+        {/* Vocabulary Sets */}
         <motion.div variants={fadeInUp}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Vocabulary</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addVocabulary}>
-                <Plus className="h-4 w-4 mr-2" /> Add Word
+              <CardTitle>Vocabulary Sets</CardTitle>
+              <Button type="button" variant="outline" size="sm" onClick={addVocabularySet}>
+                <Plus className="h-4 w-4 mr-2" /> Add Set
               </Button>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {vocabularies.map((vocab, index) => (
-                <div key={index} className="p-4 border rounded-lg relative space-y-3">
+            <CardContent className="space-y-6">
+              {vocabularySets.map((set, setIndex) => (
+                <div key={setIndex} className="p-6 border rounded-xl relative space-y-4 bg-muted/30">
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
-                    className="absolute top-2 right-2 text-destructive"
-                    onClick={() => removeVocabulary(index)}
+                    className="absolute top-2 right-2 text-destructive hover:bg-destructive/10"
+                    onClick={() => removeVocabularySet(setIndex)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <Label>Word</Label>
-                      <Input
-                        value={vocab.word}
-                        onChange={(e) => updateVocabulary(index, "word", e.target.value)}
-                        placeholder="Word"
-                      />
-                    </div>
-                    <div>
-                      <Label>Pronunciation</Label>
-                      <Input
-                        value={vocab.pronunciation}
-                        onChange={(e) => updateVocabulary(index, "pronunciation", e.target.value)}
-                        placeholder="Pronunciation"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Image</Label>
-                      {vocab.imageUrl ? (
-                        <div className="relative w-full aspect-square max-w-[120px] rounded-lg overflow-hidden border">
-                          <CldImage
-                            width="120"
-                            height="120"
-                            src={vocab.imageUrl}
-                            alt={vocab.word || "Vocabulary image"}
-                            className="object-cover"
-                          />
+
+                  <div className="max-w-md">
+                    <Label className="after:content-['*'] after:ml-0.5 after:text-red-500">Set Name (e.g. Food, Animals)</Label>
+                    <Input
+                      value={set.name}
+                      onChange={(e) => updateVocabularySetName(setIndex, e.target.value)}
+                      placeholder="Enter set name (Required for upload)"
+                      className={`mt-1 ${!set.name ? 'border-amber-300 focus-visible:ring-amber-400' : ''}`}
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">Images ({set.images.length})</Label>
+                      <CldUploadWidget
+                        key={set.name}
+                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                        onClose={() => { document.body.style.overflow = "auto" }}
+                        options={{
+                          multiple: true,
+                          resourceType: "image",
+                          clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
+                          folder: `esl-academy/newsletters/vocabulary/${slugify(set.name || "unnamed-set")}`,
+                        }}
+                        onSuccess={(result: any) => {
+                          if (result.info && typeof result.info !== "string") {
+                            const info = result.info as any
+                            const format = info.format || "png"
+                            const originalFileName = `${info.original_filename}.${format}`
+
+                            const newImage: VocabularyImage = {
+                              id: crypto.randomUUID(),
+                              imageUrl: info.public_id,
+                              fileName: originalFileName,
+                              order: vocabularySets[setIndex].images.length
+                            }
+                            addVocabularyImage(setIndex, newImage)
+                          }
+                        }}
+                      >
+                        {({ open }: { open: () => void }) => (
                           <Button
                             type="button"
-                            variant="destructive"
-                            size="icon"
-                            className="absolute top-1 right-1 h-6 w-6"
-                            onClick={() => updateVocabulary(index, "imageUrl", "")}
+                            variant={!set.name ? "outline" : "secondary"}
+                            size="sm"
+                            disabled={!set.name}
+                            onClick={() => open()}
+                            className={!set.name ? "opacity-50 cursor-not-allowed" : ""}
                           >
-                            <X className="h-3 w-3" />
+                            <Plus className="h-4 w-4 mr-2" /> {!set.name ? "Enter Name First" : "Upload Images"}
                           </Button>
-                        </div>
-                      ) : (
-                        <CldUploadWidget
-                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                          onClose={() => { document.body.style.overflow = "auto" }}
-                          onSuccess={(result) => {
-                            if (result.info && typeof result.info !== "string") {
-                              updateVocabulary(index, "imageUrl", result.info.public_id)
-                            }
-                          }}
-                        >
-                          {({ open }) => (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full h-[120px] border-dashed flex flex-col items-center justify-center"
-                              onClick={() => open()}
-                            >
-                              <Plus className="h-4 w-4 mb-2" />
-                              <span className="text-xs">Upload Image</span>
-                            </Button>
-                          )}
-                        </CldUploadWidget>
-                      )}
+                        )}
+                      </CldUploadWidget>
                     </div>
+
+                    {set.images.length > 0 ? (
+                      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
+                        {set.images.map((img, imgIndex) => (
+                          <div key={imgIndex} className="relative aspect-square rounded-lg overflow-hidden border bg-background group">
+                            <CldImage
+                              width="120"
+                              height="120"
+                              src={img.imageUrl}
+                              alt={img.fileName}
+                              className="object-cover w-full h-full"
+                            />
+                            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center p-2 text-center text-[10px] text-white">
+                              <span className="truncate w-full px-1">{img.fileName}</span>
+                              <Button
+                                type="button"
+                                variant="destructive"
+                                size="icon"
+                                className="h-6 w-6 mt-2"
+                                onClick={() => removeVocabularyImage(setIndex, imgIndex)}
+                              >
+                                <X className="h-3 w-3" />
+                              </Button>
+                            </div>
+                            <div className="absolute top-1 left-1 bg-black/60 text-white text-[8px] px-1.5 py-0.5 rounded-sm">
+                              #{imgIndex + 1}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="h-24 border-2 border-dashed rounded-lg flex flex-col items-center justify-center text-muted-foreground text-sm bg-background">
+                        <p>No images uploaded yet</p>
+                        <p className="text-xs">Multiple selection supported</p>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
+              {vocabularySets.length === 0 && (
+                <div className="text-center py-12 border-2 border-dashed rounded-xl text-muted-foreground">
+                  No vocabulary sets yet. Click &quot;Add Set&quot; to start.
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
@@ -423,89 +503,85 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
         <motion.div variants={fadeInUp}>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Videos</CardTitle>
-              <Button type="button" variant="outline" size="sm" onClick={addVideo}>
-                <Plus className="h-4 w-4 mr-2" /> Add Video
-              </Button>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {videos.map((video, index) => (
-                <div key={index} className="p-4 border rounded-lg relative space-y-3">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-destructive"
-                    onClick={() => removeVideo(index)}
-                  >
-                    <Trash2 className="h-4 w-4" />
+              <div>
+                <CardTitle>Videos</CardTitle>
+                <CardDescription>Upload multiple videos. Titles are generated automatically.</CardDescription>
+              </div>
+              <CldUploadWidget
+                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                onClose={() => { document.body.style.overflow = "auto" }}
+                options={{
+                  multiple: true,
+                  resourceType: "video",
+                  clientAllowedFormats: ["mp4", "mov", "webm", "mkv"],
+                  folder: "esl-academy/newsletters/videos",
+                }}
+                onSuccess={(result: any) => {
+                  if (result.info && typeof result.info !== "string") {
+                    const info = result.info as any
+                    const publicId = info.public_id
+                    const format = info.format || "mp4"
+                    const originalFilename = `${info.original_filename}.${format}`
+                    const thumbnailUrl = getCloudinaryVideoThumbnail(publicId)
+
+                    const newVideo: VideoItem = {
+                      id: crypto.randomUUID(),
+                      title: humanizeFileName(originalFilename),
+                      videoUrl: publicId,
+                      fileName: originalFilename,
+                      thumbnailUrl: thumbnailUrl,
+                      order: videos.length
+                    }
+                    addVideo(newVideo)
+                  }
+                }}
+              >
+                {({ open }: { open: () => void }) => (
+                  <Button type="button" variant="outline" size="sm" onClick={() => open()}>
+                    <Plus className="h-4 w-4 mr-2" /> Upload Videos
                   </Button>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <Label>Title</Label>
-                      <Input
-                        value={video.title}
-                        onChange={(e) => updateVideo(index, "title", e.target.value)}
-                        placeholder="Video Title"
-                      />
-                    </div>
-                    <div className="space-y-4">
-                      <Label>Video</Label>
-                      {video.videoUrl ? (
-                        <div className="space-y-2">
-                          <div className="aspect-[9/16] w-32 rounded-lg overflow-hidden border bg-muted relative group">
-                            <CloudinaryImage
-                              src={getCloudinaryVideoThumbnail(video.videoUrl)}
-                              alt={video.title}
-                              fill
-                              className="object-cover"
-                            />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <Play className="h-8 w-8 text-white fill-current" />
-                            </div>
-                          </div>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            size="sm"
-                            className="w-full text-destructive"
-                            onClick={() => updateVideo(index, "videoUrl", "")}
-                          >
-                            <X className="h-4 w-4 mr-2" /> Remove Video
-                          </Button>
+                )}
+              </CldUploadWidget>
+            </CardHeader>
+            <CardContent>
+              {videos.length > 0 ? (
+                <div className="space-y-3">
+                  {videos.map((video, index) => (
+                    <div key={video.id || index} className="flex items-center gap-4 p-3 rounded-xl border bg-muted/30 group hover:bg-muted/50 transition-colors">
+                      <div className="w-16 h-10 rounded-lg overflow-hidden border bg-black flex-shrink-0 relative">
+                        <CloudinaryImage
+                          src={video.thumbnailUrl || getCloudinaryVideoThumbnail(video.videoUrl)}
+                          alt={video.title}
+                          width={64}
+                          height={40}
+                          className="object-cover w-full h-full"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/20">
+                          <Play className="h-3 w-3 text-white fill-current" />
                         </div>
-                      ) : (
-                        <CldUploadWidget
-                          uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                          onClose={() => { document.body.style.overflow = "auto" }}
-                          options={{
-                            resourceType: "video",
-                            maxFiles: 1,
-                            folder: "esl-academy/newsletters/videos",
-                          }}
-                          onSuccess={(result) => {
-                            if (result.info && typeof result.info !== "string") {
-                              updateVideo(index, "videoUrl", result.info.public_id);
-                            }
-                          }}
-                        >
-                          {({ open }) => (
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className="w-full h-32 border-dashed border-2 flex flex-col gap-2"
-                              onClick={() => open()}
-                            >
-                              <Video className="h-8 w-8 text-muted-foreground" />
-                              <span className="text-sm text-muted-foreground">Upload Video</span>
-                            </Button>
-                          )}
-                        </CldUploadWidget>
-                      )}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{video.title}</p>
+                        <p className="text-[10px] text-muted-foreground truncate">{video.fileName}</p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => removeVideo(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
+              ) : (
+                <div className="text-center py-8 border-2 border-dashed rounded-xl text-muted-foreground flex flex-col items-center gap-2">
+                  <Video className="h-8 w-8 opacity-20" />
+                  <p className="text-sm">No videos uploaded yet</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
