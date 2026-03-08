@@ -489,7 +489,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
             <CardHeader className="flex flex-row items-center justify-between">
               <div>
                 <CardTitle>Videos</CardTitle>
-                <CardDescription>Upload multiple videos. Titles are generated automatically.</CardDescription>
+                <CardDescription></CardDescription>
               </div>
               <CldUploadWidget
                 uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
@@ -533,7 +533,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                 <div className="space-y-3">
                   {videos.map((video, index) => (
                     <div key={video.id || index} className="flex items-center gap-4 p-3 rounded-xl border bg-muted/30 group hover:bg-muted/50 transition-colors">
-                      <div className="w-16 h-10 rounded-lg overflow-hidden border bg-black flex-shrink-0 relative">
+                      <div className="h-10 rounded-lg overflow-hidden border bg-black flex-shrink-0 relative">
                         <CloudinaryImage
                           src={video.thumbnailUrl || getCloudinaryVideoThumbnail(video.videoUrl)}
                           alt={video.title}
@@ -546,8 +546,8 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                         </div>
                       </div>
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-sm truncate">{video.title}</p>
-                        <p className="text-[10px] text-muted-foreground truncate">{video.fileName}</p>
+                        <p className="font-medium text-sm">{video.title}</p>
+                        <p className="text-[10px] text-muted-foreground ">{video.fileName}</p>
                       </div>
                       <Button
                         type="button"
