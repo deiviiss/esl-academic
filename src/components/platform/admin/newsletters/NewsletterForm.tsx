@@ -14,7 +14,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Plus, Trash2, X, Play, Save, Video } from "lucide-react"
 import { createNewsletter, updateNewsletter } from "@/actions/newsletters/newsletter.actions"
-import { NewsletterData, VideoItem, VocabularySet, VocabularyImage } from "@/interfaces/newsletter.interface"
+import { NewsletterData, VideoItem, VocabularySet, VocabularyImage, CloudinaryUploadWidgetResults, CloudinaryUploadWidgetInfo } from "@/interfaces/newsletter.interface"
 import { Textarea } from "@/components/ui/textarea"
 
 function humanizeFileName(fileName: string) {
@@ -40,12 +40,13 @@ interface NewsletterFormProps {
 }
 
 interface ForParentsItem {
-  id?: string
+  id: string
   message: string
   documentUrl?: string | null
 }
 
 interface PlaylistLinkItem {
+  id: string
   title?: string | null
   url: string
 }
@@ -127,9 +128,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   }
 
   const updateVocabularySetName = (index: number, name: string) => {
-    const updated = [...vocabularySets]
-    updated[index].name = name
-    setVocabularySets(updated)
+    setVocabularySets(prev => prev.map((s, i) => i === index ? { ...s, name } : s))
   }
 
   const removeVocabularySet = (index: number) => {
@@ -145,11 +144,12 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   }
 
   const removeVocabularyImage = (setIndex: number, imgIndex: number) => {
-    const updated = [...vocabularySets]
-    updated[setIndex].images = updated[setIndex].images.filter((_, i) => i !== imgIndex)
-    // Re-order images
-    updated[setIndex].images = updated[setIndex].images.map((img, i) => ({ ...img, order: i }))
-    setVocabularySets(updated)
+    setVocabularySets(prev => prev.map((set, i) => {
+      if (i !== setIndex) return set
+      const updatedImages = set.images.filter((_, idx) => idx !== imgIndex)
+        .map((img, idx) => ({ ...img, order: idx }))
+      return { ...set, images: updatedImages }
+    }))
   }
 
   const addVideo = (newVideo: VideoItem) => {
@@ -182,7 +182,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   }
 
   const addForParents = () => {
-    setForParents([...forParents, { message: "", documentUrl: "" }])
+    setForParents([...forParents, { id: crypto.randomUUID(), message: "", documentUrl: "" }])
   }
 
   const removeForParents = (index: number) => {
@@ -190,13 +190,11 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   }
 
   const updateForParents = (index: number, field: keyof ForParentsItem, value: string) => {
-    const updated = [...forParents]
-    updated[index][field] = value
-    setForParents(updated)
+    setForParents(prev => prev.map((item, i) => i === index ? { ...item, [field]: value } : item))
   }
 
   const addPlaylistLink = () => {
-    setPlaylistLinks([...playlistLinks, { title: "", url: "" }])
+    setPlaylistLinks([...playlistLinks, { id: crypto.randomUUID(), title: "", url: "" }])
   }
 
   const removePlaylistLink = (index: number) => {
@@ -204,9 +202,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   }
 
   const updatePlaylistLink = (index: number, field: keyof PlaylistLinkItem, value: string) => {
-    const updated = [...playlistLinks]
-    updated[index][field] = value
-    setPlaylistLinks(updated)
+    setPlaylistLinks(prev => prev.map((link, i) => i === index ? { ...link, [field]: value } : link))
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -273,19 +269,6 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
     }
   }
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 },
-  }
-
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1,
-      },
-    },
-  }
 
   return (
     <div className="container px-4 md:px-8 py-8 md:py-12">
@@ -387,7 +370,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
             </CardHeader>
             <CardContent className="space-y-6">
               {vocabularySets.map((set, setIndex) => (
-                <div key={setIndex} className="p-6 border rounded-xl relative space-y-4 bg-muted/30">
+                <div key={set.id} className="p-6 border rounded-xl relative space-y-4 bg-muted/30">
                   <Button
                     type="button"
                     variant="ghost"
@@ -412,7 +395,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">Images ({set.images.length})</Label>
                       <CldUploadWidget
-                        key={set.name}
+                        key={set.id}
                         uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
                         onClose={() => { document.body.style.overflow = "auto" }}
                         options={{
@@ -421,9 +404,10 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                           clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
                           folder: `esl-academy/newsletters/vocabulary/${slugify(set.name || "unnamed-set")}`,
                         }}
-                        onSuccess={(result: any) => {
-                          if (result.info && typeof result.info !== "string") {
-                            const info = result.info as any
+                        onSuccess={(result) => {
+                          const uploadResult = result as CloudinaryUploadWidgetResults;
+                          if (uploadResult.info && typeof uploadResult.info !== "string") {
+                            const info = uploadResult.info as CloudinaryUploadWidgetInfo
                             const format = info.format || "png"
                             const originalFileName = `${info.original_filename}.${format}`
 
@@ -455,7 +439,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                     {set.images.length > 0 ? (
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
                         {set.images.map((img, imgIndex) => (
-                          <div key={imgIndex} className="relative aspect-square rounded-lg overflow-hidden border bg-background group">
+                          <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border bg-background group">
                             <CldImage
                               width="120"
                               height="120"
@@ -516,9 +500,10 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                   clientAllowedFormats: ["mp4", "mov", "webm", "mkv"],
                   folder: "esl-academy/newsletters/videos",
                 }}
-                onSuccess={(result: any) => {
-                  if (result.info && typeof result.info !== "string") {
-                    const info = result.info as any
+                onSuccess={(result) => {
+                  const uploadResult = result as CloudinaryUploadWidgetResults;
+                  if (uploadResult.info && typeof uploadResult.info !== "string") {
+                    const info = uploadResult.info as CloudinaryUploadWidgetInfo
                     const publicId = info.public_id
                     const format = info.format || "mp4"
                     const originalFilename = `${info.original_filename}.${format}`
@@ -597,7 +582,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
             </CardHeader>
             <CardContent className="space-y-4">
               {forParents.map((item, index) => (
-                <div key={index} className="p-4 border rounded-lg relative space-y-3">
+                <div key={item.id || index} className="p-4 border rounded-lg relative space-y-3">
                   <Button
                     type="button"
                     variant="ghost"
@@ -663,7 +648,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                   </Button>
                 </div>
                 {playlistLinks.map((link, index) => (
-                  <div key={index} className="flex gap-2 items-end">
+                  <div key={link.id || index} className="flex gap-2 items-end">
                     <div className="flex-1">
                       <Label className="text-xs">Song Title</Label>
                       <Input
@@ -719,4 +704,18 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
       </motion.form>
     </div>
   )
+}
+
+const fadeInUp = {
+  initial: { opacity: 0, y: 20 },
+  animate: { opacity: 1, y: 0 },
+  transition: { duration: 0.5 },
+}
+
+const staggerContainer = {
+  animate: {
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
 }

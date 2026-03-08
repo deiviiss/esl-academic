@@ -73,3 +73,15 @@ export interface NewsletterData {
   playlist: PlaylistData | null
   forParents: ForParentsData[]
 }
+
+export interface CloudinaryUploadWidgetInfo {
+  public_id: string
+  format: string
+  original_filename: string
+  [key: string]: unknown
+}
+
+export interface CloudinaryUploadWidgetResults {
+  info?: string | CloudinaryUploadWidgetInfo
+  event?: string
+}

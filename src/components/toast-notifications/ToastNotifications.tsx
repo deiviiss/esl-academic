@@ -3,7 +3,7 @@ import { toast } from 'sonner'
 export const noticeFailure = (message: string) => {
   toast.error(message, {
     position: 'top-right',
-    duration: 3000,
+    duration: 2000,
     className: 'bg-destructive text-white border-none',
   })
 }
@@ -11,7 +11,7 @@ export const noticeFailure = (message: string) => {
 export const noticeSuccess = (message: string) => {
   toast.success(message, {
     position: 'top-right',
-    duration: 3000,
+    duration: 2000,
     className: 'bg-primary text-white border-none',
   })
 }
