@@ -3,13 +3,23 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
-import { Plus, Edit2, Trash2, X, Save, AlertCircle } from "lucide-react"
-import { toast } from "sonner"
+import { Plus, Edit2, Trash2, X, Save, AlertCircle, AlertTriangle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { createLevel, updateLevel, deleteLevel } from "@/actions/levels/level.actions"
+import { noticeFailure, noticeSuccess } from "@/components/toast-notifications/ToastNotifications"
 
 interface LevelWithCounts {
   id: string
@@ -55,24 +65,34 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
 
     if (result.ok) {
       handleCancel()
-      toast.success(editingId ? "Level updated successfully" : "Level created successfully")
+      noticeSuccess(editingId ? "Level updated successfully" : "Level created successfully")
       router.refresh()
     } else {
-      toast.error(result.message || "Error saving level")
+      noticeFailure(result.message || "Error saving level")
     }
     setIsSubmitting(false)
   }
 
-  const handleDelete = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete the level "${name}"?`)) return
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [levelToDelete, setLevelToDelete] = useState<{ id: string; name: string } | null>(null)
 
-    const result = await deleteLevel(id)
+  const openDeleteModal = (id: string, name: string) => {
+    setLevelToDelete({ id, name })
+    setIsDeleteModalOpen(true)
+  }
+
+  const handleDelete = async () => {
+    if (!levelToDelete) return
+
+    const result = await deleteLevel(levelToDelete.id)
     if (result.ok) {
-      toast.success("Level deleted successfully")
+      noticeSuccess("Level deleted successfully")
       router.refresh()
     } else {
-      toast.error(result.message || "Error deleting level")
+      noticeFailure(result.message || "Error deleting level")
     }
+    setIsDeleteModalOpen(false)
+    setLevelToDelete(null)
   }
 
   const fadeInUp = {
@@ -195,7 +215,7 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleDelete(level.id, level.name)}
+                        onClick={() => openDeleteModal(level.id, level.name)}
                         className="h-8 w-8 p-0"
                         title="Delete"
                       >
@@ -267,7 +287,7 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleDelete(level.id, level.name)}
+                            onClick={() => openDeleteModal(level.id, level.name)}
                             className="h-8 w-8 p-0"
                             title="Delete"
                           >
@@ -299,6 +319,29 @@ export default function LevelsAdmin({ levels }: LevelsAdminProps) {
           </p>
         </motion.div>
       )}
+      <AlertDialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Confirm Deletion
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the level &quot;{levelToDelete?.name}&quot;?
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

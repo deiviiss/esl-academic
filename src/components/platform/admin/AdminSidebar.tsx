@@ -8,7 +8,6 @@ import {
   Newspaper,
   Layers,
   Users,
-  Baby,
   Package,
   ChevronRight
 } from "lucide-react"
@@ -31,16 +30,10 @@ const sidebarItems = [
   },
   {
     title: "Users",
-    href: "/platform/admin/users", // Placeholder
+    href: "/platform/admin/users",
     icon: Users,
-    isPlaceholder: true,
   },
-  {
-    title: "Children",
-    href: "/platform/admin/children", // Placeholder
-    icon: Baby,
-    isPlaceholder: true,
-  },
+
   {
     title: "Products",
     href: "/platform/admin/products", // Placeholder

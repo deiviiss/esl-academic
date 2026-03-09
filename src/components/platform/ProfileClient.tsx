@@ -6,10 +6,9 @@ import { Button } from '@/components/ui/button'
 import { motion } from 'framer-motion'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Badge } from "@/components/ui/badge"
-import { Bell, BookOpen, CreditCard, Loader, Settings, Upload, User as UserIcon, X } from "lucide-react"
+import { Loader, Settings, Upload, User as UserIcon, X } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Label } from "@/components/ui/label"
+
 import { Input } from "@/components/ui/input"
 import { type User } from "@/interfaces/user.interface"
 import { useForm } from "react-hook-form"
@@ -217,9 +216,6 @@ export const ProfileClient = ({ user }: profileProps) => {
 
   const navItems = [
     { icon: <UserIcon className="h-4 w-4" />, label: "Personal Info", value: "personal" },
-    { icon: <CreditCard className="h-4 w-4" />, label: "Subscription", value: "subscription" },
-    { icon: <BookOpen className="h-4 w-4" />, label: "Learning Materials", value: "materials" },
-    { icon: <Bell className="h-4 w-4" />, label: "Notifications", value: "notifications" },
     { icon: <Settings className="h-4 w-4" />, label: "Settings", value: "settings" },
   ]
 
@@ -255,9 +251,7 @@ export const ProfileClient = ({ user }: profileProps) => {
               </Avatar>
               <h2 className="text-xl font-semibold">{user.name}</h2>
               <p className="text-sm text-muted-foreground">{user.email}</p>
-              <Badge className="mt-2" variant="secondary">
-                {user.subscriptionPlan?.name || "Level Unknown"}
-              </Badge>
+
               <Button
                 variant="outline"
                 size="sm"
@@ -320,7 +314,7 @@ export const ProfileClient = ({ user }: profileProps) => {
                               <FormLabel htmlFor="name">Full Name</FormLabel>
                               <FormControl>
                                 <Input
-                                  disabled={isSubmitting}
+                                  disabled={true}
                                   {...field}
                                 />
                               </FormControl>
@@ -375,188 +369,6 @@ export const ProfileClient = ({ user }: profileProps) => {
                     </form>
                   </Form>
                 </CardContent>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="subscription">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subscription Plan</CardTitle>
-                  <CardDescription>Manage your subscription and billing information</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <div className="flex justify-between items-center">
-                        <div>
-                          <h3 className="font-semibold">Premium Plan</h3>
-                          <p className="text-sm text-muted-foreground">$19.99/month</p>
-                        </div>
-                        <Badge>Active</Badge>
-                      </div>
-                      <div className="mt-4 text-sm text-muted-foreground">
-                        <p>Next billing date: June 15, 2024</p>
-                      </div>
-                    </div>
-                    {/* <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Payment Method</h3>
-                      <div className="flex items-center">
-                        <CreditCard className="h-5 w-5 mr-2" />
-                        <span>•••• •••• •••• 4242</span>
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <Button variant="outline" size="sm">
-                          Update
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          Add New
-                        </Button>
-                      </div>
-                    </div> */}
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Payment Method</h3>
-                      <div className="flex items-center">
-                        <span className="text-sm">Cash</span>
-                      </div>
-                      <div className="mt-2 flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => noticeFailure("Changes are not allowed")}
-                        >
-                          Update
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => noticeFailure("Adding is not allowed")}
-                        >
-                          Add New
-                        </Button>
-                      </div>
-                    </div>
-
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Billing History</h3>
-                      <div className="text-sm">
-                        <div className="flex justify-between py-2 border-b">
-                          <span>May 15, 2024</span>
-                          <span>$19.99</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-b">
-                          <span>April 15, 2024</span>
-                          <span>$19.99</span>
-                        </div>
-                        <div className="flex justify-between py-2">
-                          <span>March 15, 2024</span>
-                          <span>$19.99</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    variant="outline"
-                    className="text-destructive hover:bg-destructive/10"
-                    onClick={() => noticeFailure("Canceling is not allowed")}
-                  >
-                    Cancel Subscription
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="materials">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Learning Materials</CardTitle>
-                  <CardDescription>Access your learning resources and downloads</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {[
-                        { title: "May Newsletter", type: "PDF", date: "May 1, 2024" },
-                        { title: "April Vocabulary List", type: "PDF", date: "April 15, 2024" },
-                        { title: "Spring Activities", type: "PDF", date: "March 20, 2024" },
-                        { title: "Conversation Practice", type: "Audio", date: "May 5, 2024" },
-                        { title: "Reading Exercises", type: "PDF", date: "April 28, 2024" },
-                        { title: "Pronunciation Guide", type: "Video", date: "March 10, 2024" },
-                      ].map((item, index) => (
-                        <motion.div
-                          key={index}
-                          whileHover={{ scale: 1.03 }}
-                          className="border rounded-lg p-4 cursor-pointer hover:border-primary transition-colors"
-                        >
-                          <div className="flex justify-between items-start">
-                            <div>
-                              <h3 className="font-semibold">{item.title}</h3>
-                              <p className="text-sm text-muted-foreground">Added: {item.date}</p>
-                            </div>
-                            <Badge variant="outline">{item.type}</Badge>
-                          </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="mt-2 w-full"
-                            onClick={() => noticeSuccess(`Downloading ${item.title}...`)}
-                            disabled={isSubmitting}
-                          >
-                            Download
-                          </Button>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    onClick={() => noticeSuccess("Redirecting to all materials...")}
-                  >
-                    View All Materials
-                  </Button>
-                </CardFooter>
-              </Card>
-            </TabsContent>
-
-            <TabsContent value="notifications">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>Manage how you receive notifications</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Email Notifications</h3>
-                      <div className="space-y-2">
-                        {[
-                          "New learning materials",
-                          "Subscription updates",
-                          "Special offers and promotions",
-                          "Newsletter",
-                        ].map((item, index) => (
-                          <div key={index} className="flex items-center justify-between">
-                            <Label htmlFor={`email-${index}`}>{item}</Label>
-                            <input
-                              type="checkbox"
-                              id={`email-${index}`}
-                              defaultChecked={index < 2}
-                              className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    onClick={() => noticeSuccess("Preferences saved successfully")}
-                  >
-                    Save Preferences</Button>
-                </CardFooter>
               </Card>
             </TabsContent>
 
@@ -641,16 +453,7 @@ export const ProfileClient = ({ user }: profileProps) => {
                         </form>
                       </Form>
                     </div>
-                    <div className="border rounded-lg p-4">
-                      <h3 className="font-semibold mb-2">Language Preferences</h3>
-                      <div className="grid gap-2">
-                        <Label htmlFor="language">Interface Language</Label>
-                        <select id="language" className="w-full rounded-md border border-input bg-background px-3 py-2">
-                          <option value="en">English</option>
-                          {/* <option value="es">Español</option> */}
-                        </select>
-                      </div>
-                    </div>
+
                   </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
@@ -670,82 +473,82 @@ export const ProfileClient = ({ user }: profileProps) => {
             </TabsContent>
           </Tabs>
         </motion.div>
+      </div>
 
-        {/* TODO: create component */}
-        {/* Avatar Change Modal */}
-        <Dialog open={avatarModalOpen} onOpenChange={setAvatarModalOpen}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Change Profile Picture</DialogTitle>
-              <DialogDescription>
-                Upload a new profile picture. The image should be square and at least 200x200 pixels.
-              </DialogDescription>
-            </DialogHeader>
+      {/* TODO: create component */}
+      {/* Avatar Change Modal */}
+      <Dialog open={avatarModalOpen} onOpenChange={setAvatarModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Change Profile Picture</DialogTitle>
+            <DialogDescription>
+              Upload a new profile picture. The image should be square and at least 200x200 pixels.
+            </DialogDescription>
+          </DialogHeader>
 
-            <div className="grid gap-4 py-4">
-              <div className="flex flex-col items-center gap-4">
-                <Avatar className="h-32 w-32">
-                  <AvatarImage
-                    src={avatarPreview || "/imgs/avatar.png"}
-                    alt="Preview"
-                    className="object-cover"
-                  />
-                  <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
-                </Avatar>
+          <div className="grid gap-4 py-4">
+            <div className="flex flex-col items-center gap-4">
+              <Avatar className="h-32 w-32">
+                <AvatarImage
+                  src={avatarPreview || "/imgs/avatar.png"}
+                  alt="Preview"
+                  className="object-cover"
+                />
+                <AvatarFallback>{user.name?.charAt(0) || "U"}</AvatarFallback>
+              </Avatar>
 
-                {avatarPreview ? (
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline" size="sm"
-                      onClick={clearAvatarPreview}
-                      disabled={isSubmitting}
-                    >
-                      <X className="h-4 w-4 mr-2" />
-                      Clear
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => fileInputRef.current?.click()}
-                      disabled={isSubmitting}
-                    >
-                      <Upload className="h-4 w-4 mr-2" />
-                      Change
-                    </Button>
-                  </div>
-                ) : (
+              {avatarPreview ? (
+                <div className="flex gap-2">
                   <Button
+                    variant="outline" size="sm"
+                    onClick={clearAvatarPreview}
                     disabled={isSubmitting}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Clear
+                  </Button>
+                  <Button
+                    size="sm"
                     onClick={() => fileInputRef.current?.click()}
+                    disabled={isSubmitting}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    Upload Image
+                    Change
                   </Button>
-                )}
+                </div>
+              ) : (
+                <Button
+                  disabled={isSubmitting}
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Upload className="h-4 w-4 mr-2" />
+                  Upload Image
+                </Button>
+              )}
 
-                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
-              </div>
+              <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
             </div>
+          </div>
 
-            <DialogFooter className="flex flex-col gap-3 sm:flex-row">
-              <Button
-                variant="outline"
-                disabled={isSubmitting}
-                onClick={() => setAvatarModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button
-                onClick={handleAvatarUpload}
-                disabled={!avatarPreview || isSubmitting}
-              >
-                {isSubmitting ? <>
-                  Saving
-                  <Loader className="animate-spin h-4 w-4 mr-2" />
-                </> : "Save Changes"}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
+          <DialogFooter className="flex flex-col gap-3 sm:flex-row">
+            <Button
+              variant="outline"
+              disabled={isSubmitting}
+              onClick={() => setAvatarModalOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              onClick={handleAvatarUpload}
+              disabled={!avatarPreview || isSubmitting}
+            >
+              {isSubmitting ? <>
+                Saving
+                <Loader className="animate-spin h-4 w-4 mr-2" />
+              </> : "Save Changes"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   )
 }
