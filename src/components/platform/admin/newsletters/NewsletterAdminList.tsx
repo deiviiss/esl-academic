@@ -4,13 +4,23 @@ import { motion } from "framer-motion"
 import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Calendar, Edit, Trash2, Plus } from "lucide-react"
+import { Calendar, Edit, Trash2, Plus, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { NewsletterListItem } from "@/interfaces/newsletter.interface"
 import { deleteNewsletter } from "@/actions/newsletters/newsletter.actions"
-import { noticeSuccess, noticeFailure, noticeWarning } from "@/components/toast-notifications/ToastNotifications"
+import { noticeSuccess, noticeFailure } from "@/components/toast-notifications/ToastNotifications"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface NewsletterAdminListProps {
   newsletters: NewsletterListItem[]
@@ -19,27 +29,30 @@ interface NewsletterAdminListProps {
 export default function NewsletterAdminList({ newsletters }: NewsletterAdminListProps) {
   const router = useRouter()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [newsletterToDelete, setNewsletterToDelete] = useState<{ id: string; title: string } | null>(null)
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
 
-  const handleDelete = async (id: string, title: string) => {
-    noticeWarning(
-      `Delete "${title}"?`,
-      "This will permanently remove the newsletter and all its files.",
-      {
-        label: "Delete",
-        onClick: async () => {
-          setDeletingId(id)
-          const result = await deleteNewsletter(id)
+  const handleDeleteClick = (id: string, title: string) => {
+    setNewsletterToDelete({ id, title })
+    setIsDeleteAlertOpen(true)
+  }
 
-          if (result.ok) {
-            noticeSuccess("Newsletter deleted successfully")
-            router.refresh()
-          } else {
-            noticeFailure(result.message || "Error deleting newsletter")
-            setDeletingId(null)
-          }
-        }
-      }
-    )
+  const confirmDelete = async () => {
+    if (!newsletterToDelete) return
+
+    const { id } = newsletterToDelete
+    setDeletingId(id)
+    const result = await deleteNewsletter(id)
+
+    if (result.ok) {
+      noticeSuccess("Newsletter deleted successfully")
+      router.refresh()
+    } else {
+      noticeFailure(result.message || "Error deleting newsletter")
+      setDeletingId(null)
+    }
+    setIsDeleteAlertOpen(false)
+    setNewsletterToDelete(null)
   }
 
   const fadeInUp = {
@@ -130,7 +143,7 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
                     <Button
                       variant="destructive"
                       className="flex-1"
-                      onClick={() => handleDelete(newsletter.id, newsletter.title)}
+                      onClick={() => handleDeleteClick(newsletter.id, newsletter.title)}
                       disabled={deletingId === newsletter.id}
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
@@ -143,6 +156,30 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
           </motion.div>
         )}
       </motion.div>
+
+      <AlertDialog open={isDeleteAlertOpen} onOpenChange={setIsDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
+              <AlertTriangle className="h-5 w-5" />
+              Confirm Deletion
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the newsletter &quot;{newsletterToDelete?.title}&quot;?
+              This will permanently remove the newsletter and all its associated files. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setNewsletterToDelete(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors"
+            >
+              Delete Newsletter
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   )
 }

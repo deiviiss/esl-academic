@@ -7,6 +7,7 @@ import { ToogleDarkMode } from '../dark-mode/toogle-dark-mode/toogle-dark-mode'
 import { usePathname } from 'next/navigation'
 import Image from "next/image"
 import { cn } from "@/lib/utils"
+import { Shield } from "lucide-react"
 
 interface HeaderClientProps {
   hasCourse: boolean
@@ -49,18 +50,22 @@ export default function HeaderClient({ hasCourse, isAdmin }: HeaderClientProps) 
               </Link>
             )}
             {isAdmin && (
-              <Link href="/platform/admin">
-                <motion.span
-                  className={cn(
-                    "text-sm font-medium hover:text-primary transition-colors",
-                    isAdminPage ? "text-primary" : "text-muted-foreground"
-                  )}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Admin Panel
-                </motion.span>
-              </Link>
+              <Button
+                asChild
+                variant={isAdminPage ? "default" : "outline"}
+                size="sm"
+                className="gap-2"
+              >
+                <Link href="/platform/admin">
+                  <Shield className="h-4 w-4" />
+                  <motion.span
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    Admin Panel
+                  </motion.span>
+                </Link>
+              </Button>
             )}
           </nav>
           <div className='flex items-center gap-3'>
@@ -93,7 +98,8 @@ export default function HeaderClient({ hasCourse, isAdmin }: HeaderClientProps) 
             </Link>
           )}
           {isAdmin && (
-            <Link href="/platform/admin">
+            <Link href="/platform/admin" className="flex items-center gap-1">
+              <Shield className="h-4 w-4 text-primary" />
               <motion.span
                 className={cn(
                   "text-sm font-medium hover:text-primary transition-colors",

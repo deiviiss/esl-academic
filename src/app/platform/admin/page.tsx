@@ -24,9 +24,8 @@ const quickStats = [
     title: "Users",
     description: "Manage students and administrators",
     icon: Users,
-    href: "#",
+    href: "/platform/admin/users",
     color: "bg-orange-500",
-    isPlaceholder: true,
   },
   {
     title: "Products",

@@ -1,12 +1,7 @@
 "use client"
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { cn } from "@/lib/utils"
+
 import { useRouter } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { Users, ChevronDown, ChevronRight } from "lucide-react"
@@ -79,22 +74,34 @@ export function ChildSelector({ childrenList, selectedChildId }: ChildSelectorPr
                 <ChevronDown className="w-4 h-4" />
               </Button>
             </div>
-            <Select value={selectedChildId} onValueChange={onValueChange}>
-              <SelectTrigger
-                id="child-select"
-                className="h-12 bg-background/50 border-white/10 rounded-xl hover:bg-background/80 transition-all duration-300"
-              >
-                <SelectValue placeholder="Selection a student" />
-              </SelectTrigger>
-              <SelectContent className="rounded-xl border-white/20 backdrop-blur-lg">
-                {childrenList.map((child) => (
-                  <SelectItem key={child.id} value={child.id} className="focus:bg-primary/10 rounded-lg cursor-pointer">
-                    <span className="font-medium text-foreground">{child.name}</span>
-                    <span className="ml-2 text-xs text-muted-foreground">({child.level.name})</span>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid gap-2">
+              {childrenList.map((child) => (
+                <button
+                  key={child.id}
+                  onClick={() => onValueChange(child.id)}
+                  className={cn(
+                    "flex flex-row items-center justify-between p-3 rounded-lg border transition-all duration-300 text-left w-full group/item",
+                    selectedChildId === child.id
+                      ? "bg-primary/10 border-primary shadow-sm"
+                      : "bg-background/40 border-white/5 hover:bg-background/60 hover:border-primary/30"
+                  )}
+                >
+                  <div className="flex flex-col">
+                    <span className="font-semibold text-foreground text-xs uppercase tracking-tight">
+                      {child.name}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground font-medium">
+                      {child.level.name}
+                    </span>
+                  </div>
+                  {selectedChildId === child.id ? (
+                    <div className="h-1.5 w-1.5 rounded-full bg-primary" />
+                  ) : (
+                    <ChevronRight className="w-3 h-3 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                  )}
+                </button>
+              ))}
+            </div>
           </motion.div>
         ) : (
           <motion.div
