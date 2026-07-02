@@ -3,6 +3,7 @@ import "./globals.css";
 import { textFont } from "@/config/fonts";
 import { Providers } from "@/components/providers/Providers";
 import { Toaster } from "sonner";
+import ScrollToTopButton from "@/components/ui/scroll-to-top-button";
 
 export const metadata: Metadata = {
   title: "Miss Kelly ESL Academy - Learn English Naturally",
@@ -54,6 +55,7 @@ export default function RootLayout({
               className: 'font-sans',
             }}
           />
+          <ScrollToTopButton />
         </Providers>
       </body>
     </html >

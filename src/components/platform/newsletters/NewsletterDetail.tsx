@@ -62,7 +62,7 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
         <motion.div variants={fadeInUp} initial="initial" animate="animate">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {/* Navigation Tabs */}
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-4 sticky top-24 md:top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
               <TabsTrigger value="vocabulary">
                 <Book className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Vocabulary</span>
