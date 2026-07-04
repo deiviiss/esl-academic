@@ -46,5 +46,5 @@ export default async function NewsletterPage({ params }: { params: Params }) {
     }
   }
 
-  return <NewsletterDetail newsletter={newsletter} />
+  return <NewsletterDetail newsletter={newsletter} isAdmin={session.role === "admin"} />
 }
