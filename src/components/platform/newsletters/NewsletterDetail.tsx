@@ -15,12 +15,14 @@ import Link from "next/link"
 import { NewsletterDetailData } from "@/interfaces/newsletter.interface"
 import { generateVocabularyPDF } from "@/utils/newsletter-pdf.utils"
 import { toast } from "sonner"
+import { cn } from "@/lib/utils"
 
 interface NewsletterDetailProps {
   newsletter: NewsletterDetailData
+  isAdmin?: boolean
 }
 
-export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) {
+export default function NewsletterDetail({ newsletter, isAdmin = false }: NewsletterDetailProps) {
   const [activeTab, setActiveTab] = useState("vocabulary")
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
@@ -62,7 +64,10 @@ export default function NewsletterDetail({ newsletter }: NewsletterDetailProps) 
         <motion.div variants={fadeInUp} initial="initial" animate="animate">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
             {/* Navigation Tabs */}
-            <TabsList className="grid w-full grid-cols-4 sticky top-24 md:top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm">
+            <TabsList className={cn(
+              "grid w-full grid-cols-4 sticky z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 shadow-sm  md:top-16",
+              isAdmin ? "top-24" : "top-[77px]"
+            )}>
               <TabsTrigger value="vocabulary">
                 <Book className="h-4 w-4 mr-2" />
                 <span className="hidden sm:inline">Vocabulary</span>
