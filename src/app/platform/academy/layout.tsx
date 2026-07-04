@@ -16,5 +16,5 @@ export default async function AcademyLayout({
     return redirect("/no-access")
   }
 
-  return <>{children}</>
+  return <section className='max-w-5xl mx-auto'>{children}</section>
 }
