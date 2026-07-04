@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useLayoutEffect } from "react"
 import { motion } from "framer-motion"
 import { format } from "date-fns"
 import { CloudinaryImage } from "@/components/platform/CloudinaryImage"
@@ -10,9 +10,9 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Book, Calendar, Download, ExternalLink, Info, Music, Play, Youtube, Video } from "lucide-react"
+import { Book, Calendar, Download, ExternalLink, Info, Music, Play, Youtube, Video, X, ChevronLeft, ChevronRight } from "lucide-react"
 import Link from "next/link"
-import { NewsletterDetailData } from "@/interfaces/newsletter.interface"
+import { NewsletterDetailData, VocabularyImage } from "@/interfaces/newsletter.interface"
 import { generateVocabularyPDF } from "@/utils/newsletter-pdf.utils"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
@@ -26,6 +26,42 @@ export default function NewsletterDetail({ newsletter, isAdmin = false }: Newsle
   const [activeTab, setActiveTab] = useState("vocabulary")
   const [activeVideoId, setActiveVideoId] = useState<string | null>(null)
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false)
+  const [isImageViewerOpen, setIsImageViewerOpen] = useState(false)
+  const [currentSetImages, setCurrentSetImages] = useState<VocabularyImage[]>([])
+  const [currentImageIndex, setCurrentImageIndex] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
+
+  useLayoutEffect(() => {
+    if (isImageViewerOpen && scrollRef.current) {
+      scrollRef.current.scrollTo({
+        left: currentImageIndex * scrollRef.current.clientWidth,
+        behavior: "instant"
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isImageViewerOpen])
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: scrollRef.current.clientWidth, behavior: "smooth" })
+    }
+  }
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -scrollRef.current.clientWidth, behavior: "smooth" })
+    }
+  }
+
+  const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget
+    const index = Math.round(target.scrollLeft / target.clientWidth)
+    if (index !== currentImageIndex) {
+      setCurrentImageIndex(index)
+    }
+  }
 
   // Use UTC components to avoid timezone shift (e.g., March 1st UTC showing as Feb 28th Local)
   const date = new Date(newsletter.month)
@@ -125,16 +161,24 @@ export default function NewsletterDetail({ newsletter, isAdmin = false }: Newsle
                     </CardHeader>
                     <CardContent className="pt-6">
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                        {set.images.map((img) => (
-                          <div key={img.id} className="group relative aspect-square rounded-xl overflow-hidden border bg-muted shadow-sm hover:shadow-md transition-all">
+                        {set.images.map((img, index) => (
+                          <div
+                            key={img.id}
+                            className="group relative aspect-square rounded-xl overflow-hidden border bg-muted shadow-sm hover:shadow-md transition-all cursor-pointer"
+                            onClick={() => {
+                              setCurrentSetImages(set.images)
+                              setCurrentImageIndex(index)
+                              setIsImageViewerOpen(true)
+                            }}
+                          >
                             <CloudinaryImage
                               src={img.imageUrl}
                               alt={img.fileName}
                               fill
-                              className="object-cover transition-transform duration-500 group-hover:scale-110"
+                              className="object-cover object-top transition-transform duration-500 group-hover:scale-110"
                             />
                             <div className="absolute inset-x-0 bottom-0 bg-black/60 backdrop-blur-sm p-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <p className="text-[10px] text-white text-center truncate">{img.fileName}</p>
+                              <p className="text-[10px] text-white text-center truncate">{img.fileName.replace(/\.[^/.]+$/, "")}</p>
                             </div>
                           </div>
                         ))}
@@ -356,6 +400,68 @@ export default function NewsletterDetail({ newsletter, isAdmin = false }: Newsle
           </Card>
         </motion.div>
       </div>
+
+      {/* Full-screen Image Viewer */}
+      {isImageViewerOpen && currentSetImages.length > 0 && (
+        <div className="fixed inset-0 z-[99999] bg-background/95 backdrop-blur-sm flex items-center justify-center">
+          {currentImageIndex > 0 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-background/20 hover:bg-background/40 hover:text-foreground"
+              onClick={handlePrevImage}
+            >
+              <ChevronLeft className="size-8" />
+              <span className="sr-only">previous</span>
+            </Button>
+          )}
+
+          {currentImageIndex < currentSetImages.length - 1 && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-50 rounded-full bg-background/20 hover:bg-background/40 hover:text-foreground"
+              onClick={handleNextImage}
+            >
+              <ChevronRight className="size-8" />
+              <span className="sr-only">next</span>
+            </Button>
+          )}
+
+          <div className="relative w-full h-full max-w-6xl max-h-[90vh] flex items-center justify-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="absolute -top-3 min-[520px]:top-2 right-0 sm:top-0 md:right-4 z-50 rounded-full bg-background/40 hover:bg-background/60 hover:text-foreground backdrop-blur-md"
+              onClick={() => setIsImageViewerOpen(false)}
+            >
+              <X className="size-6" />
+              <span className="sr-only">close</span>
+            </Button>
+
+            <div
+              ref={scrollRef}
+              className="flex w-full h-full overflow-x-auto snap-x snap-mandatory scroll-smooth [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+              onScroll={handleScroll}
+            >
+              {currentSetImages.map((img, index) => (
+                <div
+                  key={img.id || index}
+                  className="w-full h-full shrink-0 snap-center relative"
+                >
+                  <CloudinaryImage
+                    src={img.imageUrl}
+                    alt={img.fileName}
+                    fill
+                    className="object-contain"
+                    priority={index === currentImageIndex}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

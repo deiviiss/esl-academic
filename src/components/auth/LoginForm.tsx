@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { IoInformationOutline } from 'react-icons/io5'
+import { IoInformationOutline, IoEyeOutline, IoEyeOffOutline } from 'react-icons/io5'
 import { z } from 'zod'
 import { login } from '@/actions/auth/login'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,7 @@ export const LoginForm = () => {
   const redirectTo = searchParams.get('redirectTo') || '/platform/academy/newsletters'
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   const defaultValuesForm = {
     email: '',
@@ -116,7 +117,20 @@ export const LoginForm = () => {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type='password' placeholder='Contraseña' {...field} value={field.value} />
+                      <div className="relative">
+                        <Input type={showPassword ? 'text' : 'password'} placeholder='Contraseña' {...field} value={field.value} />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword(!showPassword)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                        >
+                          {showPassword ? (
+                            <IoEyeOffOutline className="h-5 w-5" />
+                          ) : (
+                            <IoEyeOutline className="h-5 w-5" />
+                          )}
+                        </button>
+                      </div>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
