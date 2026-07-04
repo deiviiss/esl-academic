@@ -23,7 +23,9 @@ const ProfilePage = async () => {
   }
 
   return (
-    <ProfileClient user={user} />
+    <section className='max-w-5xl mx-auto'>
+      <ProfileClient user={user} />
+    </section>
   )
 }
 
