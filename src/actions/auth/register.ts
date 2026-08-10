@@ -12,10 +12,23 @@ interface RegisterUser {
 
 export const registerUser = async (data: RegisterUser) => {
   try {
+    const normalizedEmail = data.email.toLowerCase().trim()
+
+    const existingUser = await prisma.user.findUnique({
+      where: { email: normalizedEmail }
+    })
+
+    if (existingUser) {
+      return {
+        ok: false,
+        message: 'No fue posible completar el registro. Si ya tienes una cuenta registrada, intenta iniciar sesión.'
+      }
+    }
+
     const user = await prisma.user.create({
       data: {
         name: data.name,
-        email: data.email,
+        email: normalizedEmail,
         phoneNumber: `${data.phoneNumber}`,
         password: bcrypt.hashSync(data.password)
       },
@@ -33,10 +46,10 @@ export const registerUser = async (data: RegisterUser) => {
       user
     }
   } catch (error) {
-    console.error('Error creating user', error)
+    console.error('Error creating user:', error instanceof Error ? error.message : error)
     return {
       ok: false,
-      message: 'Error creating user'
+      message: 'No fue posible completar el registro. Intenta de nuevo más tarde.'
     }
   }
 }
