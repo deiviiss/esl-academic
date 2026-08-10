@@ -16,7 +16,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input'
 import { titleFont } from '@/config/fonts'
 import { motion } from 'framer-motion'
-import { BookOpen } from 'lucide-react'
+import Image from 'next/image'
 
 const registerSchema = z.object({
   name: z.string().min(3, { message: 'Name is required' }).max(255, { message: 'Name must be less than 255 characters' }),
@@ -96,7 +96,12 @@ export const RegisterForm = () => {
           <Card>
             <CardHeader>
               <div className="flex items-center justify-center mb-2">
-                <BookOpen className="h-10 w-10 text-primary" />
+                <Image
+                  src="/logo.webp"
+                  alt="Miss Kelly ESL Academy"
+                  width={100}
+                  height={0}
+                />
               </div>
               <CardTitle className={`${titleFont.className} text-2xl text-center`}>Create an account</CardTitle>
               <CardDescription className='text-center' >Enter your details to create your account</CardDescription>
@@ -165,9 +170,9 @@ export const RegisterForm = () => {
               >
                 {
                   error && (
-                    <div className='flex mb-2 text-red-600 text-sm'>
-                      <IoInformationOutline className='h-5 w-5' />
-                      <p className=''>Invalid credentials</p>
+                    <div className='flex items-center mb-2 text-red-600 text-sm'>
+                      <IoInformationOutline className='h-5 w-5 shrink-0' />
+                      <p className='ml-1'>{error}</p>
                     </div>
                   )
                 }
