@@ -90,7 +90,7 @@ export default function AboutPage() {
               <Skeleton className="absolute inset-0 w-[400px] h-[300px] rounded-lg mx-auto" />
             )}
             <Image
-              src="/imgs/29.png"
+              src="https://res.cloudinary.com/dhyds3mnm/image/upload/v1786365878/about_miss_kelly_1_czucli.jpg"
               alt="Miss Kelly teaching students"
               width={400}
               height={300}
@@ -192,7 +192,7 @@ export default function AboutPage() {
               <Skeleton className="absolute inset-0 w-[500px] h-[600px] rounded-lg mx-auto" />
             )}
             <Image
-              src="/imgs/30.png"
+              src="https://res.cloudinary.com/dhyds3mnm/image/upload/v1786365880/about_miss_kelly_2_bgtsd9.jpg"
               alt="Miss Kelly"
               width={500}
               height={600}
