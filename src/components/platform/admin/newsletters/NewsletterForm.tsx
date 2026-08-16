@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { CldUploadWidget, CldImage } from "next-cloudinary"
@@ -51,6 +51,25 @@ interface PlaylistLinkItem {
   url: string
 }
 
+function AutoOpenUploadWidget({
+  open,
+  isLoading
+}: {
+  open?: () => void
+  isLoading?: boolean
+}) {
+  const hasOpenedRef = useRef(false)
+
+  useEffect(() => {
+    if (!hasOpenedRef.current && !isLoading && typeof open === "function") {
+      hasOpenedRef.current = true
+      open()
+    }
+  }, [open, isLoading])
+
+  return null
+}
+
 export default function NewsletterForm({ newsletter, levels }: NewsletterFormProps) {
   const router = useRouter()
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -84,6 +103,11 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   const [vocabularySets, setVocabularySets] = useState<VocabularySet[]>(
     newsletter?.vocabularySets || []
   )
+  const [activeUploadSet, setActiveUploadSet] = useState<{
+    setIndex: number
+    name: string
+  } | null>(null)
+
   const [videos, setVideos] = useState<VideoItem[]>(
     newsletter?.videos ? newsletter.videos.map(v => ({
       ...v,
@@ -132,7 +156,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
   }
 
   const removeVocabularySet = (index: number) => {
-    const setName = vocabularySets[index].name || "this set"
+    const setName = vocabularySets[index]?.name || "this set"
     noticeWarning(
       `Remove "${setName}"?`,
       "Any images uploaded to this set will be removed from the form.",
@@ -394,46 +418,16 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">Images ({set.images.length})</Label>
-                      <CldUploadWidget
-                        key={set.id}
-                        uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                        onClose={() => { document.body.style.overflow = "auto" }}
-                        options={{
-                          multiple: true,
-                          resourceType: "image",
-                          clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
-                          folder: `esl-academy/newsletters/vocabulary/${slugify(set.name || "unnamed-set")}`,
-                        }}
-                        onSuccess={(result) => {
-                          const uploadResult = result as CloudinaryUploadWidgetResults;
-                          if (uploadResult.info && typeof uploadResult.info !== "string") {
-                            const info = uploadResult.info as CloudinaryUploadWidgetInfo
-                            const format = info.format || "png"
-                            const originalFileName = `${info.original_filename}.${format}`
-
-                            const newImage: VocabularyImage = {
-                              id: crypto.randomUUID(),
-                              imageUrl: info.public_id,
-                              fileName: originalFileName,
-                              order: vocabularySets[setIndex].images.length
-                            }
-                            addVocabularyImage(setIndex, newImage)
-                          }
-                        }}
+                      <Button
+                        type="button"
+                        variant={!set.name.trim() ? "outline" : "secondary"}
+                        size="sm"
+                        disabled={!set.name.trim()}
+                        onClick={() => setActiveUploadSet({ setIndex, name: set.name.trim() })}
+                        className={!set.name.trim() ? "opacity-50 cursor-not-allowed" : ""}
                       >
-                        {({ open }: { open: () => void }) => (
-                          <Button
-                            type="button"
-                            variant={!set.name ? "outline" : "secondary"}
-                            size="sm"
-                            disabled={!set.name}
-                            onClick={() => open()}
-                            className={!set.name ? "opacity-50 cursor-not-allowed" : ""}
-                          >
-                            <Plus className="h-4 w-4 mr-2" /> {!set.name ? "Enter Name First" : "Upload Images"}
-                          </Button>
-                        )}
-                      </CldUploadWidget>
+                        <Plus className="h-4 w-4 mr-2" /> {!set.name.trim() ? "Enter Name First" : "Upload Images"}
+                      </Button>
                     </div>
 
                     {set.images.length > 0 ? (
@@ -478,6 +472,43 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                 <div className="text-center py-12 border-2 border-dashed rounded-xl text-muted-foreground">
                   No vocabulary sets yet. Click &quot;Add Set&quot; to start.
                 </div>
+              )}
+
+              {activeUploadSet && (
+                <CldUploadWidget
+                  key={`vocab-upload-${activeUploadSet.setIndex}-${slugify(activeUploadSet.name)}`}
+                  uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                  onClose={() => {
+                    document.body.style.overflow = "auto"
+                    setActiveUploadSet(null)
+                  }}
+                  options={{
+                    multiple: true,
+                    resourceType: "image",
+                    clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
+                    folder: `esl-academy/newsletters/vocabulary/${slugify(activeUploadSet.name)}`,
+                  }}
+                  onSuccess={(result) => {
+                    const uploadResult = result as CloudinaryUploadWidgetResults
+                    if (uploadResult.info && typeof uploadResult.info !== "string") {
+                      const info = uploadResult.info as CloudinaryUploadWidgetInfo
+                      const format = info.format || "png"
+                      const originalFileName = `${info.original_filename}.${format}`
+
+                      const newImage: VocabularyImage = {
+                        id: crypto.randomUUID(),
+                        imageUrl: info.public_id,
+                        fileName: originalFileName,
+                        order: vocabularySets[activeUploadSet.setIndex]?.images.length || 0
+                      }
+                      addVocabularyImage(activeUploadSet.setIndex, newImage)
+                    }
+                  }}
+                >
+                  {({ open, isLoading }: { open?: () => void; isLoading?: boolean } = {}) => (
+                    <AutoOpenUploadWidget open={open} isLoading={isLoading} />
+                  )}
+                </CldUploadWidget>
               )}
             </CardContent>
           </Card>

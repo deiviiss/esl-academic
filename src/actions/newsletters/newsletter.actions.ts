@@ -402,3 +402,21 @@ export const deleteNewsletter = async (id: string) => {
     return { ok: false, message: 'Failed to delete newsletter' }
   }
 }
+
+/**
+ * Deletes uploaded images from Cloudinary when discarded in the form.
+ */
+export const deleteUploadedImages = async (publicIds: string[]) => {
+  if (!publicIds || publicIds.length === 0) {
+    return { ok: true, message: 'No images to delete' }
+  }
+
+  try {
+    await deleteCloudinaryResources(publicIds, 'image')
+    return { ok: true, message: 'Images deleted from Cloudinary' }
+  } catch (error) {
+    console.error('Error deleting images from Cloudinary:', error)
+    return { ok: false, message: 'Failed to delete images from Cloudinary' }
+  }
+}
+
