@@ -1,11 +1,9 @@
 'use server'
 
 import { z } from 'zod'
-import { v2 as cloudinary } from "cloudinary";
+import { deleteCloudinaryResource } from '@/lib/cloudinary.server'
 
 const imageSchema = z.string().url("Invalid image URL");
-
-cloudinary.config(process.env.CLOUDINARY_URL ?? "");
 
 export const deleteUserImage = async (imageUrl: string) => {
   if (!imageUrl || imageUrl.trim() === "") {
@@ -26,14 +24,26 @@ export const deleteUserImage = async (imageUrl: string) => {
 
   const image = imageParsed.data
 
-  const parts = image.split('/');
-  const publicIdWithExtension = parts.slice(-3).join('/');
-  const publicId = publicIdWithExtension.split('.').slice(0, -1).join('.')
+  let publicId = "";
+  const avatarFolderIndex = image.indexOf("esl-academy/user-avatars/");
+
+  if (avatarFolderIndex !== -1) {
+    const rawPath = image.substring(avatarFolderIndex).split("?")[0];
+    publicId = rawPath.replace(/\.[^/.]+$/, "");
+  } else {
+    // Fallback: extract last segments
+    const parts = image.split('/');
+    const publicIdWithExtension = parts.slice(-3).join('/');
+    publicId = publicIdWithExtension.split('.').slice(0, -1).join('.');
+  }
 
   try {
-    const result = await cloudinary.uploader.destroy(publicId);
+    const result = await deleteCloudinaryResource(publicId, {
+      resourceType: "image",
+      type: "authenticated"
+    });
 
-    if (result.result !== 'ok') {
+    if (result && result.result !== 'ok' && result.result !== 'not found') {
       return {
         ok: false,
         message: 'Error deleting image'
@@ -45,10 +55,10 @@ export const deleteUserImage = async (imageUrl: string) => {
       message: 'Deleted successfully'
     }
   } catch (error) {
-    console.error('Error deleting user', error)
+    console.error('Error deleting user avatar:', error)
     return {
       ok: false,
-      message: 'Error deleting user, please contact support'
+      message: 'Error deleting user image, please contact support'
     }
   }
 }

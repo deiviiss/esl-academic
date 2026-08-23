@@ -23,7 +23,7 @@ export const CloudinaryImage = (props: CloudinaryImageProps) => {
 
   // Check if it's a full URL or a relative path
   if (isFullUrl(src)) {
-    return <Image src={src} alt={alt} {...rest} />
+    return <Image src={src} alt={alt} unoptimized {...rest} />
   }
 
   // Otherwise, treat as Cloudinary public_id

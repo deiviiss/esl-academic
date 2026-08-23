@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { v2 as cloudinary } from "cloudinary";
-
-cloudinary.config(process.env.CLOUDINARY_URL ?? "");
+import { uploadProtectedResource, getProtectedSignedUrl } from "@/lib/cloudinary.server";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
@@ -27,11 +25,11 @@ export async function POST(req: NextRequest) {
     const buffer = Buffer.from(arrayBuffer);
     const base64 = buffer.toString("base64");
 
-    const uploadResult = await cloudinary.uploader.upload(
+    const uploadResult = await uploadProtectedResource(
       `data:${file.type};base64,${base64}`,
       {
         folder: "esl-academy/user-avatars",
-        resource_type: "image",
+        resourceType: "image",
         transformation: [
           { width: 500, height: 500, crop: "limit" },
           { quality: "auto", fetch_format: "auto" },
@@ -39,7 +37,9 @@ export async function POST(req: NextRequest) {
       }
     );
 
-    return NextResponse.json({ ok: true, url: uploadResult.secure_url });
+    const signedUrl = getProtectedSignedUrl(uploadResult.public_id);
+
+    return NextResponse.json({ ok: true, url: signedUrl });
   } catch (error) {
     console.error("Cloudinary upload failed:", error);
     return NextResponse.json({ ok: false, message: "Upload error" }, { status: 500 });

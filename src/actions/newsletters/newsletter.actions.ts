@@ -1,7 +1,12 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { deleteCloudinaryResources } from '@/lib/cloudinary'
+import {
+  deleteCloudinaryResources,
+  getSignedImageUrl,
+  getSignedVideoUrl,
+  getSignedVideoThumbnailUrl
+} from '@/lib/cloudinary.server'
 
 /**
  * Fetches all newsletters associated with a specific level, ordered by year and month descending.
@@ -55,7 +60,8 @@ export const getAllNewsletters = async () => {
 }
 
 /**
- * Fetches a single newsletter by ID with all its related content.
+ * Fetches a single newsletter by ID with all its related content,
+ * resolving authenticated public IDs into server-signed delivery URLs.
  */
 export const getNewsletterById = async (id: string) => {
   try {
@@ -71,7 +77,11 @@ export const getNewsletterById = async (id: string) => {
             }
           }
         },
-        videos: true,
+        videos: {
+          orderBy: {
+            order: 'asc'
+          }
+        },
         levels: true,
         forParents: true,
         playlist: {
@@ -82,11 +92,44 @@ export const getNewsletterById = async (id: string) => {
       }
     })
 
-    return newsletter
+    if (!newsletter) return null
+
+    // Transform public IDs into server-signed delivery URLs in memory
+    return {
+      ...newsletter,
+      vocabularySets: newsletter.vocabularySets.map((set) => ({
+        ...set,
+        images: set.images.map((img) => ({
+          ...img,
+          imageUrl: getSignedImageUrl(img.imageUrl)
+        }))
+      })),
+      videos: newsletter.videos.map((video) => ({
+        ...video,
+        videoUrl: getSignedVideoUrl(video.videoUrl),
+        thumbnailUrl: getSignedVideoThumbnailUrl(video.videoUrl)
+      }))
+    }
   } catch (error) {
     console.error('Error fetching newsletter by ID:', error)
     return null
   }
+}
+
+
+/**
+ * Ensures clean public_id is stored in the database even if a full signed URL was passed.
+ */
+const extractPublicId = (urlOrPublicId: string, folderPrefix: string): string => {
+  if (!urlOrPublicId) return ''
+  if (!urlOrPublicId.startsWith('http')) return urlOrPublicId
+
+  const folderIndex = urlOrPublicId.indexOf(folderPrefix)
+  if (folderIndex !== -1) {
+    const rawPath = urlOrPublicId.substring(folderIndex).split('?')[0]
+    return rawPath.replace(/\.[^/.]+$/, '')
+  }
+  return urlOrPublicId
 }
 
 /**
@@ -123,7 +166,7 @@ export const createNewsletter = async (data: {
             name: set.name,
             images: {
               create: set.images.map(img => ({
-                imageUrl: img.imageUrl,
+                imageUrl: extractPublicId(img.imageUrl, 'esl-academy/newsletters/vocabulary/'),
                 fileName: img.fileName,
                 order: img.order
               }))
@@ -133,7 +176,7 @@ export const createNewsletter = async (data: {
         videos: data.videos ? {
           create: data.videos.map(v => ({
             title: v.title,
-            videoUrl: v.videoUrl,
+            videoUrl: extractPublicId(v.videoUrl, 'esl-academy/newsletters/videos/'),
             fileName: v.fileName,
             thumbnailUrl: v.thumbnailUrl,
             order: v.order
@@ -215,9 +258,10 @@ export const updateNewsletter = async (
   }
 ) => {
   try {
-    console.log('UPDATING NEWSLETTER:', id)
-    console.log('DATA:', JSON.stringify(data, null, 2))
     // Use transaction to ensure atomicity
+    let orphanedImages: string[] = []
+    let orphanedVideos: string[] = []
+
     const newsletter = await prisma.$transaction(async (tx) => {
       // 1. Fetch current assets to identify orphaned ones later
       const existingSets = await tx.vocabularySet.findMany({
@@ -231,13 +275,13 @@ export const updateNewsletter = async (
       const oldImagePublicIds = existingSets.flatMap(s => s.images.map(img => img.imageUrl))
       const oldVideoPublicIds = existingVideos.map(v => v.videoUrl)
 
-      // Get new public IDs from payload
-      const newImagePublicIds = data.vocabularySets?.flatMap(s => s.images.map(img => img.imageUrl)) || []
-      const newVideoPublicIds = data.videos?.map(v => v.videoUrl) || []
+      // Get sanitized new public IDs from payload
+      const newImagePublicIds = data.vocabularySets?.flatMap(s => s.images.map(img => extractPublicId(img.imageUrl, 'esl-academy/newsletters/vocabulary/'))) || []
+      const newVideoPublicIds = data.videos?.map(v => extractPublicId(v.videoUrl, 'esl-academy/newsletters/videos/')) || []
 
       // Identify orphaned (old ones not in new ones)
-      const orphanedImages = oldImagePublicIds.filter(publicId => !newImagePublicIds.includes(publicId))
-      const orphanedVideos = oldVideoPublicIds.filter(publicId => !newVideoPublicIds.includes(publicId))
+      orphanedImages = oldImagePublicIds.filter(publicId => !newImagePublicIds.includes(publicId))
+      orphanedVideos = oldVideoPublicIds.filter(publicId => !newVideoPublicIds.includes(publicId))
 
       // Delete existing nested relations
       for (const set of existingSets) {
@@ -272,7 +316,7 @@ export const updateNewsletter = async (
               name: set.name,
               images: {
                 create: set.images.map(img => ({
-                  imageUrl: img.imageUrl,
+                  imageUrl: extractPublicId(img.imageUrl, 'esl-academy/newsletters/vocabulary/'),
                   fileName: img.fileName,
                   order: img.order
                 }))
@@ -282,7 +326,7 @@ export const updateNewsletter = async (
           videos: data.videos ? {
             create: data.videos.map(v => ({
               title: v.title,
-              videoUrl: v.videoUrl,
+              videoUrl: extractPublicId(v.videoUrl, 'esl-academy/newsletters/videos/'),
               fileName: v.fileName,
               thumbnailUrl: v.thumbnailUrl,
               order: v.order
@@ -329,29 +373,33 @@ export const updateNewsletter = async (
         }
       })
 
-      // 4. Delete from Cloudinary (Orphaned assets)
-      if (orphanedImages.length > 0) {
-        await deleteCloudinaryResources(orphanedImages, 'image')
-      }
-      if (orphanedVideos.length > 0) {
-        await deleteCloudinaryResources(orphanedVideos, 'video')
-      }
-
       return updatedNewsletter
     })
 
+    // 4. Delete from Cloudinary (Orphaned assets, outside DB transaction)
+    if (orphanedImages.length > 0) {
+      await deleteCloudinaryResources(orphanedImages, 'image')
+    }
+    if (orphanedVideos.length > 0) {
+      await deleteCloudinaryResources(orphanedVideos, 'video')
+    }
+
     return { ok: true, newsletter }
   } catch (error: unknown) {
-    console.log('AN ERROR OCCURRED DURING UPDATE', error)
+    console.error('Error updating newsletter:', error)
     return { ok: false, message: 'Failed to update newsletter' }
   }
 }
+
 
 /**
  * Deletes a newsletter and all its nested relations (cascade handled by Prisma).
  */
 export const deleteNewsletter = async (id: string) => {
   try {
+    let imagePublicIds: string[] = []
+    let videoPublicIds: string[] = []
+
     await prisma.$transaction(async (tx) => {
       // 1. Fetch all assets to delete from Cloudinary
       const existingSets = await tx.vocabularySet.findMany({
@@ -362,8 +410,8 @@ export const deleteNewsletter = async (id: string) => {
         where: { newsletterId: id }
       })
 
-      const imagePublicIds = existingSets.flatMap(s => s.images.map(img => img.imageUrl))
-      const videoPublicIds = existingVideos.map(v => v.videoUrl)
+      imagePublicIds = existingSets.flatMap(s => s.images.map(img => img.imageUrl))
+      videoPublicIds = existingVideos.map(v => v.videoUrl)
 
       // 2. Delete existing nested relations in DB
       for (const set of existingSets) {
@@ -386,15 +434,15 @@ export const deleteNewsletter = async (id: string) => {
       await tx.newsletter.delete({
         where: { id }
       })
-
-      // 4. Delete from Cloudinary (Only if DB deletion succeeded)
-      if (imagePublicIds.length > 0) {
-        await deleteCloudinaryResources(imagePublicIds, 'image')
-      }
-      if (videoPublicIds.length > 0) {
-        await deleteCloudinaryResources(videoPublicIds, 'video')
-      }
     })
+
+    // 4. Delete from Cloudinary (Outside DB transaction to prevent P2028 timeouts)
+    if (imagePublicIds.length > 0) {
+      await deleteCloudinaryResources(imagePublicIds, 'image')
+    }
+    if (videoPublicIds.length > 0) {
+      await deleteCloudinaryResources(videoPublicIds, 'video')
+    }
 
     return { ok: true }
   } catch (error: unknown) {
@@ -419,4 +467,3 @@ export const deleteUploadedImages = async (publicIds: string[]) => {
     return { ok: false, message: 'Failed to delete images from Cloudinary' }
   }
 }
-
