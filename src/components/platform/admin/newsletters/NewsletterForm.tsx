@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
-import { CldUploadWidget, CldImage } from "next-cloudinary"
+import { CldUploadWidget } from "next-cloudinary"
 import { CloudinaryImage } from "@/components/platform/CloudinaryImage"
 import { getCloudinaryVideoThumbnail } from "@/utils/cloudinary.utils"
 import { noticeSuccess, noticeFailure, noticeWarning } from "@/components/toast-notifications/ToastNotifications"
@@ -114,6 +114,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
       thumbnailUrl: v.thumbnailUrl || null
     })) : []
   )
+  const [isUploadingVideo, setIsUploadingVideo] = useState(false)
   const [forParents, setForParents] = useState<ForParentsItem[]>(
     newsletter?.forParents ? newsletter.forParents.map(f => ({ ...f, documentUrl: f.documentUrl ?? null })) : []
   )
@@ -434,9 +435,9 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-2">
                         {set.images.map((img, imgIndex) => (
                           <div key={img.id} className="relative aspect-square rounded-lg overflow-hidden border bg-background group">
-                            <CldImage
-                              width="120"
-                              height="120"
+                            <CloudinaryImage
+                              width={120}
+                              height={120}
                               src={img.imageUrl}
                               alt={img.fileName}
                               className="object-cover w-full h-full"
@@ -478,6 +479,7 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                 <CldUploadWidget
                   key={`vocab-upload-${activeUploadSet.setIndex}-${slugify(activeUploadSet.name)}`}
                   uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                  signatureEndpoint="/api/sign-cloudinary-params"
                   onClose={() => {
                     document.body.style.overflow = "auto"
                     setActiveUploadSet(null)
@@ -486,7 +488,9 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                     multiple: true,
                     resourceType: "image",
                     clientAllowedFormats: ["png", "jpg", "jpeg", "webp"],
-                    folder: `esl-academy/newsletters/vocabulary/${slugify(activeUploadSet.name)}`,
+                    folder: title.trim()
+                      ? `esl-academy/newsletters/vocabulary/${year}/${slugify(title)}/${slugify(activeUploadSet.name)}`
+                      : `esl-academy/newsletters/vocabulary/${year}/${slugify(activeUploadSet.name)}`,
                   }}
                   onSuccess={(result) => {
                     const uploadResult = result as CloudinaryUploadWidgetResults
@@ -522,44 +526,57 @@ export default function NewsletterForm({ newsletter, levels }: NewsletterFormPro
                 <CardTitle>Videos</CardTitle>
                 <CardDescription></CardDescription>
               </div>
-              <CldUploadWidget
-                uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
-                onClose={() => { document.body.style.overflow = "auto" }}
-                options={{
-                  multiple: true,
-                  resourceType: "video",
-                  clientAllowedFormats: ["mp4", "mov", "webm", "mkv"],
-                  folder: "esl-academy/newsletters/videos",
-                }}
-                onSuccess={(result) => {
-                  const uploadResult = result as CloudinaryUploadWidgetResults;
-                  if (uploadResult.info && typeof uploadResult.info !== "string") {
-                    const info = uploadResult.info as CloudinaryUploadWidgetInfo
-                    const publicId = info.public_id
-                    const format = info.format || "mp4"
-                    const originalFilename = `${info.original_filename}.${format}`
-                    const thumbnailUrl = getCloudinaryVideoThumbnail(publicId)
-
-                    const newVideo: VideoItem = {
-                      id: crypto.randomUUID(),
-                      title: humanizeFileName(originalFilename),
-                      videoUrl: publicId,
-                      fileName: originalFilename,
-                      thumbnailUrl: thumbnailUrl,
-                      order: videos.length
-                    }
-                    addVideo(newVideo)
-                  }
-                }}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                disabled={!title.trim()}
+                onClick={() => setIsUploadingVideo(true)}
               >
-                {({ open }: { open: () => void }) => (
-                  <Button type="button" variant="outline" size="sm" onClick={() => open()}>
-                    <Plus className="h-4 w-4 mr-2" /> Upload Videos
-                  </Button>
-                )}
-              </CldUploadWidget>
+                <Plus className="h-4 w-4 mr-2" /> Upload Videos
+              </Button>
             </CardHeader>
             <CardContent>
+              {isUploadingVideo && (
+                <CldUploadWidget
+                  uploadPreset={process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET}
+                  signatureEndpoint="/api/sign-cloudinary-params"
+                  onClose={() => {
+                    document.body.style.overflow = "auto"
+                    setIsUploadingVideo(false)
+                  }}
+                  options={{
+                    multiple: true,
+                    resourceType: "video",
+                    clientAllowedFormats: ["mp4", "mov", "webm", "mkv"],
+                    folder: `esl-academy/newsletters/videos/${year}/${slugify(title)}`,
+                  }}
+                  onSuccess={(result) => {
+                    const uploadResult = result as CloudinaryUploadWidgetResults;
+                    if (uploadResult.info && typeof uploadResult.info !== "string") {
+                      const info = uploadResult.info as CloudinaryUploadWidgetInfo
+                      const publicId = info.public_id
+                      const format = info.format || "mp4"
+                      const originalFilename = `${info.original_filename}.${format}`
+                      const thumbnailUrl = getCloudinaryVideoThumbnail(publicId)
+
+                      const newVideo: VideoItem = {
+                        id: crypto.randomUUID(),
+                        title: humanizeFileName(originalFilename),
+                        videoUrl: publicId,
+                        fileName: originalFilename,
+                        thumbnailUrl: thumbnailUrl,
+                        order: videos.length
+                      }
+                      addVideo(newVideo)
+                    }
+                  }}
+                >
+                  {({ open, isLoading }: { open?: () => void; isLoading?: boolean } = {}) => (
+                    <AutoOpenUploadWidget open={open} isLoading={isLoading} />
+                  )}
+                </CldUploadWidget>
+              )}
               {videos.length > 0 ? (
                 <div className="space-y-3">
                   {videos.map((video, index) => (
