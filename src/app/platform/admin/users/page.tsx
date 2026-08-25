@@ -2,8 +2,9 @@ import { getAllUsers } from "@/actions/users/get-all-users"
 import UserList from "@/components/platform/admin/users/UserList"
 import { Users as UsersIcon } from "lucide-react"
 
-export default async function AdminUsersPage() {
-  const { ok, users = [] } = await getAllUsers()
+export default async function AdminUsersPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
+  const { q } = await searchParams
+  const { ok, users = [] } = await getAllUsers(q)
 
   return (
     <div className="container px-4 md:px-8 py-8 md:py-12 mx-auto">

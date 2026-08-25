@@ -2,11 +2,18 @@
 
 import prisma from '@/lib/prisma'
 
-export const getAllUsers = async () => {
+export const getAllUsers = async (query?: string) => {
   try {
     const users = await prisma.user.findMany({
       where: {
-        role: 'user' // We only want to manage parents/users, not other admins (though could be changed)
+        role: 'user', // We only want to manage parents/users, not other admins (though could be changed)
+        ...(query ? {
+          OR: [
+            { name: { contains: query, mode: 'insensitive' } },
+            { email: { contains: query, mode: 'insensitive' } },
+            { phoneNumber: { contains: query } }
+          ]
+        } : {})
       },
       include: {
         children: {
