@@ -11,6 +11,10 @@
       "source": "local/git-message",
       "sourceType": "local"
     },
+    "tech-doc": {
+      "source": "local/tech-doc",
+      "sourceType": "local"
+    },
     "vercel-react-best-practices": {
       "source": "vercel-labs/agent-skills",
       "sourceType": "github",

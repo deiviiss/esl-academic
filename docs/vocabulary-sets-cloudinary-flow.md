@@ -1,10 +1,10 @@
 # Arquitectura e Implementación: Flujo de Vocabulary Sets y Cloudinary
 
-> **Estado del Módulo**: 🟢 Producción (Entrega Firmada, Transformaciones CDN, Inicialización Perezosa y Carga On-Demand por Año/Newsletter)  
-> **Última Actualización**: 2026-08-23  
+> **Estado del Módulo**: 🟢 Producción (Entrega Firmada, Transformaciones CDN, Inicialización Perezosa, Carga On-Demand y Avatares Protegidos)  
+> **Última Actualización**: 2026-08-24  
 > **Proyecto**: ESL Academy (Miss Kelly)  
 
-Este documento detalla los fundamentos técnicos, decisiones de diseño (ADRs), modelo de datos, seguridad criptográfica, optimización CDN y el estado de producción de la carga y gestión multimedia en boletines (*newsletters*).
+Este documento detalla los fundamentos técnicos, decisiones de diseño (ADRs), modelo de datos, seguridad criptográfica, optimización CDN y el estado de producción de la carga y gestión multimedia en boletines (*newsletters*) y avatares de usuario.
 
 ---
 
@@ -18,6 +18,7 @@ Este documento detalla los fundamentos técnicos, decisiones de diseño (ADRs), 
   - **Videos**: `esl-academy/newsletters/videos/<año>/<slug-del-newsletter>/`
   - **Vocabulario**: `esl-academy/newsletters/vocabulary/<año>/<slug-del-newsletter>/<slug-del-set>/`
 - **Ciclo de Vida Limpio y Transacciones Rápidas**: Garantizar la eliminación atómica y limpia de recursos en Cloudinary fuera de las transacciones SQL de Prisma, evitando bloqueos y timeouts de base de datos (`P2028`).
+- **Protección Privada de Avatares**: Almacenar y servir los avatares de usuario bajo el catálogo privado `type: 'authenticated'` con firmas criptográficas de servidor (`getProtectedSignedUrl`).
 
 ---
 
@@ -75,6 +76,12 @@ Este documento detalla los fundamentos técnicos, decisiones de diseño (ADRs), 
   1. Las transacciones interactivas de Prisma tienen un límite de espera estricto de 5000 ms. Realizar peticiones por red a Cloudinary dentro de la transacción provocaba el error `P2028 (Transaction API error: Transaction already closed)`.
   2. Al ejecutarse después de confirmar en PostgreSQL (~25 ms), la base de datos responde de inmediato y la eliminación remota se completa limpia.
 
+### 2.10 Generación de URLs Autenticadas para Avatares (`getProtectedSignedUrl`)
+- **Decisión**: Usar `getProtectedSignedUrl` en [`src/app/api/upload-avatar/route.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/app/api/upload-avatar/route.ts) para generar URLs firmadas con `type: 'authenticated'`.
+- **¿Por qué?**:
+  1. Los avatares de usuario se suben mediante `uploadProtectedResource` al catálogo privado `type: 'authenticated'`.
+  2. Generar las URLs con `getProtectedSignedUrl` entrega la ruta válida `/image/authenticated/...` resolviendo errores 404 al renderizarlos en el cliente.
+
 ---
 
 ## 3. Modelo de Datos y Esquema Prisma
@@ -122,6 +129,7 @@ sequenceDiagram
     actor Admin as Administrador
     participant Form as NewsletterForm (Client)
     participant SignRoute as /api/sign-cloudinary-params (Server)
+    participant AvatarRoute as /api/upload-avatar (Server)
     participant CloudinaryCDN as Cloudinary CDN / Storage
     participant Actions as newsletter.actions (Server Action)
     participant CldServer as cloudinary.server.ts (Server)
@@ -137,6 +145,12 @@ sequenceDiagram
     Actions->>CldServer: getSignedImageUrl(publicId) genera URL firmada (sign_url: true, f_auto, q_auto)
     Actions->>CldServer: (Fuera de transacción BD) deleteMultipleCloudinaryResources() (type: 'upload')
     CldServer->>CloudinaryCDN: Elimina físicamente archivos remotos en Cloudinary
+
+    note over AvatarRoute,CloudinaryCDN: Flujo de Avatares Privados
+    Admin->>AvatarRoute: Envía archivo mediante POST /api/upload-avatar
+    AvatarRoute->>CldServer: uploadProtectedResource() sube a type: 'authenticated'
+    AvatarRoute->>CldServer: getProtectedSignedUrl() genera URL privada /image/authenticated/...
+    AvatarRoute-->>Admin: Retorna URL privada firmada válida
 ```
 
 ---
@@ -144,7 +158,7 @@ sequenceDiagram
 ## 5. Estructura de Componentes y Funcionalidades
 
 ### 5.1 Utilidades e Infraestructura Servidor
-- **[`src/lib/cloudinary.server.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/lib/cloudinary.server.ts)**: Servidor de integración centralizado. Contiene `getSignedImageUrl`, `getSignedVideoUrl`, `deleteMultipleCloudinaryResources`, `uploadProtectedResource` y `signUploadParams`.
+- **[`src/lib/cloudinary.server.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/lib/cloudinary.server.ts)**: Servidor de integración centralizado. Contiene `getSignedImageUrl`, `getSignedVideoUrl`, `getProtectedSignedUrl`, `deleteMultipleCloudinaryResources`, `uploadProtectedResource` y `signUploadParams`.
 - **[`src/utils/cloudinary.utils.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/utils/cloudinary.utils.ts)**: Utilidades de cliente para detección de URLs completas (`isFullUrl`) y formateo auxiliar.
 - **[`src/utils/newsletter-pdf.utils.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/utils/newsletter-pdf.utils.ts)**: Generador de PDFs optimizado que consume directamente las URLs de servidor firmadas.
 
@@ -172,8 +186,9 @@ sequenceDiagram
 
 | Archivo / Ruta | Tipo | Descripción |
 | :--- | :--- | :--- |
-| [`src/lib/cloudinary.server.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/lib/cloudinary.server.ts) | Servidor / Helper | SDK de Cloudinary con inicialización perezosa `getCloudinary()` y firmas `sign_url: true`. |
+| [`src/lib/cloudinary.server.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/lib/cloudinary.server.ts) | Servidor / Helper | SDK de Cloudinary con inicialización perezosa `getCloudinary()`, firmas `sign_url: true` y `getProtectedSignedUrl()`. |
 | [`src/app/api/sign-cloudinary-params/route.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/app/api/sign-cloudinary-params/route.ts) | API Route | Endpoint para firmar parámetros del widget del cliente. |
+| [`src/app/api/upload-avatar/route.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/app/api/upload-avatar/route.ts) | API Route | Endpoint de carga de avatares privados usando `uploadProtectedResource` y `getProtectedSignedUrl`. |
 | [`src/actions/newsletters/newsletter.actions.ts`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/actions/newsletters/newsletter.actions.ts) | Server Actions | Operaciones CRUD y eliminación de huérfanos fuera de la transacción SQL. |
 | [`src/components/platform/admin/newsletters/NewsletterForm.tsx`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/components/platform/admin/newsletters/NewsletterForm.tsx) | Client UI | Formulario de boletines con carga On-Demand para vocabulario y videos por año y título. |
 | [`src/components/platform/CloudinaryImage.tsx`](file:///d:/repositorios/typeScript/antigravity_agent/academy-kelly/src/components/platform/CloudinaryImage.tsx) | Client UI | Renderizado optimizado de imágenes sin sobre-procesar en Next.js (`unoptimized`). |
@@ -188,3 +203,4 @@ sequenceDiagram
 | :--- | :--- | :--- |
 | 2026-08-22 | 🟡 MVP | Implementación inicial de widgets de carga y estructura de boletines. |
 | 2026-08-23 | 🟢 Producción | Migración completa a **URLs Criptográficamente Firmadas** (`sign_url: true`, `secure: true`), optimizaciones de caché CDN y transformaciones automáticas (`f_auto`, `q_auto`, `crop: 'limit'`), endpoint de firmas `/api/sign-cloudinary-params`, inicialización perezosa `getCloudinary()`, eliminación masiva con `type: 'upload'`, carpetas On-Demand por año/título y solución al timeout Prisma `P2028`. |
+| 2026-08-24 | 🟢 Producción | Corrección de URLs para avatares privados en `/api/upload-avatar/route.ts` usando `getProtectedSignedUrl()` con el catálogo `type: 'authenticated'`. |
