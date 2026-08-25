@@ -2,7 +2,7 @@
 name: git-message
 description: >
   Generate git commit messages and pull request descriptions.
-  Uses Conventional Commits + gitmoji + structured markdown + branch names.
+  Uses Conventional Commits + gitmoji + structured markdown.
   Auto-detects intent: commit or PR.
   Trigger: "commit", "mensaje de commit", "PR", "pull request".
 ---
@@ -12,21 +12,13 @@ Determine intent: COMMIT or PR.
 - If user says "commit" → generate COMMIT
 - If user says "PR" or "pull request" → generate PR
 
-## CRITICAL OUTPUT RULE
+## OUTPUT STRUCTURE
 
-- Output MUST consist of EXACTLY TWO SEPARATE code blocks:
-  1. Block 1: Raw branch name ONLY (e.g. `feat/yena-reference-filter`)
-  2. Block 2: Complete commit message or PR description in markdown
-- Do NOT add `git checkout -b` or explanations outside/inside the blocks.
+Deliver the response divided into clearly separated, clean sections:
 
----
-
-## BRANCH NAME RULES
-
-- Always suggest a git branch name
-- Format: `<type>/<kebab-case-short-summary>` (e.g. `feat/yena-reference-filter`, `docs/add-etl-domains-skill`, `fix/aggregators-duplicate-error`)
-- Max 40 characters for the branch name slug
-- Lowercase only, hyphen-separated
+1. **Commit / PR Message** (inside a markdown code block for easy copying)
+2. **Suggested Branch Name** (inside a code block for easy copying)
+3. **Non-Technical Summary / Resumen Sencillo** (in plain Spanish formatted as Markdown)
 
 ---
 
@@ -34,15 +26,15 @@ Determine intent: COMMIT or PR.
 
 ### Rules
 
-- English only
-- Use Conventional Commit types (feat, fix, refactor, docs, etc.)
+- English only for commit message and description
+- Use Conventional Commit types (feat, fix, refactor, etc.)
 - Include a gitmoji
 - Summary ≤ 50 characters
 - Be concise and clear
 
 ### Output format
 
-Block 1 (Commit Message):
+#### 1. Mensaje de Commit
 ```markdown
 <type>: <gitmoji> <summary>
 
@@ -54,10 +46,13 @@ Block 1 (Commit Message):
 - <Detailed explanation of what, why, impact>
 ```
 
-Block 2 (Raw Branch Name):
-```text
-<type>/<kebab-case-short-summary>
+#### 2. Nombre de Rama Sugerido
+```bash
+<type>/<short-description-kebab-case>
 ```
+
+#### 3. Resumen en Lenguaje Sencillo
+- <Explicación breve, clara y en español sencillo para personas no técnicas sobre los cambios realizados>
 
 ---
 
@@ -65,14 +60,14 @@ Block 2 (Raw Branch Name):
 
 ### Rules
 
-- English only
+- English only for PR description
 - Group related changes
 - Remove duplicates
 - Infer intent from commits
 
-### Output format
+### Format
 
-Block 1 (PR Description):
+#### 1. Descripción de Pull Request
 ```markdown
 <type>: <gitmoji> <PR summary>
 
@@ -86,23 +81,20 @@ Block 1 (PR Description):
 - Impact (UI, perf, architecture)
 ```
 
-Block 2 (Raw Branch Name):
-```text
-<type>/<kebab-case-short-summary>
+#### 2. Nombre de Rama Sugerido
+```bash
+<type>/<short-description-kebab-case>
 ```
 
-
----
+#### 3. Resumen en Lenguaje Sencillo
+- <Explicación breve, clara y en español sencillo para personas no técnicas sobre los cambios realizados>
 
 ## Heuristics
 
 - UI / UX → feat: 🎨
 - Fixes → fix: 🐛
 - Internal cleanup → refactor: 🧱
-- Documentation → docs: 📝
 - Mixed → pick dominant change
-
----
 
 ## Behavior
 
@@ -110,8 +102,6 @@ Block 2 (Raw Branch Name):
 - If commits present → summarize
 - If repeated commits → deduplicate
 - Prioritize clarity over verbosity
-
----
 
 ## Triggers
 
