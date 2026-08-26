@@ -77,7 +77,7 @@ export default function NewsletterDetail({ newsletter, isAdmin = false }: Newsle
   }
 
   return (
-    <div className="container px-0 md:px-8 py-8 md:py-12">
+    <div className="container px-0 md:px-8 py-8 md:pt-12 md:pb-1">
       {/* Header */}
       <motion.div
         className="mb-8 text-center"
@@ -94,7 +94,7 @@ export default function NewsletterDetail({ newsletter, isAdmin = false }: Newsle
       </motion.div>
 
       {/* Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-8 items-start">
 
         {/* Tabs */}
         <motion.div variants={fadeInUp} initial="initial" animate="animate">
@@ -341,13 +341,15 @@ export default function NewsletterDetail({ newsletter, isAdmin = false }: Newsle
 
         {/* Quick Summary */}
         <motion.div
-          className="space-y-6"
+          className={cn(
+            "space-y-6 lg:sticky self-start z-30 lg:top-[70px]"
+          )}
           variants={fadeInUp}
           initial="initial"
           animate="animate"
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-primary/20 shadow-md">
+          <Card className="border-primary/20 shadow-md overflow-hidden">
             <CardHeader className="bg-primary/5">
               <CardTitle className="text-lg">Quick Summary</CardTitle>
             </CardHeader>
