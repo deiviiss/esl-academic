@@ -10,7 +10,7 @@ import { NewsletterListItem } from "@/interfaces/newsletter.interface"
 import { deleteNewsletter, toggleNewsletterPublished } from "@/actions/newsletters/newsletter.actions"
 import { noticeSuccess, noticeFailure } from "@/components/toast-notifications/ToastNotifications"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +30,26 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
   const router = useRouter()
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [publishingId, setPublishingId] = useState<string | null>(null)
+  const [publishedOverrides, setPublishedOverrides] = useState<Record<string, boolean>>({})
   const [newsletterToDelete, setNewsletterToDelete] = useState<{ id: string; title: string } | null>(null)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
+
+  useEffect(() => {
+    setPublishedOverrides((overrides) => {
+      const remainingOverrides = Object.fromEntries(
+        Object.entries(overrides).filter(([id, isPublished]) => {
+          const newsletter = newsletters.find((item) => item.id === id)
+          return newsletter && newsletter.isPublished !== isPublished
+        })
+      )
+
+      if (Object.keys(remainingOverrides).length === Object.keys(overrides).length) {
+        return overrides
+      }
+
+      return remainingOverrides
+    })
+  }, [newsletters])
 
   const handleDeleteClick = (id: string, title: string) => {
     setNewsletterToDelete({ id, title })
@@ -61,7 +79,11 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
     try {
       const result = await toggleNewsletterPublished(id)
 
-      if (result.ok) {
+      if (result.ok && result.newsletter) {
+        setPublishedOverrides((overrides) => ({
+          ...overrides,
+          [id]: result.newsletter.isPublished
+        }))
         noticeSuccess(result.message || "Newsletter visibility updated successfully")
         router.refresh()
       } else {
@@ -87,6 +109,9 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
       },
     },
   }
+
+  const getPublishedState = (newsletter: NewsletterListItem) =>
+    publishedOverrides[newsletter.id] ?? newsletter.isPublished
 
   return (
     <div className="container px-4 md:px-8 py-8 md:py-12">
@@ -134,12 +159,12 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
                       className="absolute right-4 top-4"
                       onClick={() => handleTogglePublished(newsletter.id)}
                       disabled={publishingId === newsletter.id || deletingId === newsletter.id}
-                      title={newsletter.isPublished ? "Hide newsletter" : "Show newsletter"}
-                      aria-label={newsletter.isPublished ? "Hide newsletter" : "Show newsletter"}
+                      title={getPublishedState(newsletter) ? "Hide newsletter" : "Show newsletter"}
+                      aria-label={getPublishedState(newsletter) ? "Hide newsletter" : "Show newsletter"}
                     >
                       {publishingId === newsletter.id ? (
                         <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
-                      ) : newsletter.isPublished ? (
+                      ) : getPublishedState(newsletter) ? (
                         <Eye className="h-4 w-4" aria-hidden="true" />
                       ) : (
                         <EyeOff className="h-4 w-4" aria-hidden="true" />
