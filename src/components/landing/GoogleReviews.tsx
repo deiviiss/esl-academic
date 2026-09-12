@@ -70,7 +70,7 @@ function ReviewCard({ review, index }: { review: Review; index: number }) {
                 <StarRating rating={review.rating} />
               </div>
               <p className="text-sm text-muted-foreground">{review.date}</p>
-              <div className="text-sm text-muted-foreground leading-relaxed">
+              <div className="text-sm leading-relaxed text-muted-foreground">
                 <p className="line-clamp-3">
                   {review.text}
                 </p>
@@ -175,10 +175,14 @@ export default function GoogleReviews() {
         <div className="grid gap-6 py-12 md:grid-cols-2 lg:grid-cols-3">
           {loading
             ? Array.from({ length: 6 }).map((_, index) => (
-              <ReviewSkeleton key={index} />
+              <div key={index} className="min-w-0">
+                <ReviewSkeleton />
+              </div>
             ))
             : reviewsData?.reviews.slice(0, 6).map((review, index) => (
-              <ReviewCard key={index} review={review} index={index} />
+              <div key={index} className="min-w-0">
+                <ReviewCard review={review} index={index} />
+              </div>
             ))
           }
         </div>
