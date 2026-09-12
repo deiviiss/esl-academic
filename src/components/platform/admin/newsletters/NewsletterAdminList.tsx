@@ -4,10 +4,10 @@ import { motion } from "framer-motion"
 import { format } from "date-fns"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Calendar, Edit, Trash2, Plus, AlertTriangle } from "lucide-react"
+import { Calendar, Edit, Eye, EyeOff, Loader2, Trash2, Plus, AlertTriangle } from "lucide-react"
 import Link from "next/link"
 import { NewsletterListItem } from "@/interfaces/newsletter.interface"
-import { deleteNewsletter } from "@/actions/newsletters/newsletter.actions"
+import { deleteNewsletter, toggleNewsletterPublished } from "@/actions/newsletters/newsletter.actions"
 import { noticeSuccess, noticeFailure } from "@/components/toast-notifications/ToastNotifications"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
@@ -29,6 +29,7 @@ interface NewsletterAdminListProps {
 export default function NewsletterAdminList({ newsletters }: NewsletterAdminListProps) {
   const router = useRouter()
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [publishingId, setPublishingId] = useState<string | null>(null)
   const [newsletterToDelete, setNewsletterToDelete] = useState<{ id: string; title: string } | null>(null)
   const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false)
 
@@ -53,6 +54,19 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
     }
     setIsDeleteAlertOpen(false)
     setNewsletterToDelete(null)
+  }
+
+  const handleTogglePublished = async (id: string) => {
+    setPublishingId(id)
+    const result = await toggleNewsletterPublished(id)
+
+    if (result.ok) {
+      noticeSuccess(result.message || "Newsletter visibility updated successfully")
+      router.refresh()
+    } else {
+      noticeFailure(result.message || "Error updating newsletter visibility")
+      setPublishingId(null)
+    }
   }
 
   const fadeInUp = {
@@ -108,7 +122,24 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
             {newsletters.map((newsletter) => (
               <motion.div key={newsletter.id} variants={fadeInUp}>
                 <Card className="h-full flex flex-col">
-                  <CardHeader>
+                  <CardHeader className="relative">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-4 top-4"
+                      onClick={() => handleTogglePublished(newsletter.id)}
+                      disabled={publishingId === newsletter.id || deletingId === newsletter.id}
+                      title={newsletter.isPublished ? "Hide newsletter" : "Show newsletter"}
+                      aria-label={newsletter.isPublished ? "Hide newsletter" : "Show newsletter"}
+                    >
+                      {publishingId === newsletter.id ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
+                      ) : newsletter.isPublished ? (
+                        <Eye className="h-4 w-4" aria-hidden="true" />
+                      ) : (
+                        <EyeOff className="h-4 w-4" aria-hidden="true" />
+                      )}
+                    </Button>
                     <div className="flex items-center text-sm text-muted-foreground mb-2">
                       <Calendar className="h-4 w-4 mr-1" />
                       {(() => {

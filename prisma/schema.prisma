@@ -118,10 +118,11 @@ model Level {
 }
 
 model Newsletter {
-  id    String   @id @default(uuid())
-  title String // Newsletter title, e.g., "October 2024 Newsletter"
-  month DateTime
-  year  Int
+  id          String   @id @default(uuid())
+  title       String // Newsletter title, e.g., "October 2024 Newsletter"
+  month       DateTime
+  year        Int
+  isPublished Boolean  @default(true)
 
   forParents ForParents[]
   levels     Level[]

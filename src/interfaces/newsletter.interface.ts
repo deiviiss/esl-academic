@@ -5,6 +5,7 @@ export interface NewsletterListItem {
   title: string
   month: Date | string
   year: number
+  isPublished: boolean
   levels: Level[]
   createdAt: Date | string
 }
