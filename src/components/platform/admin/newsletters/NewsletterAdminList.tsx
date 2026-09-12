@@ -58,13 +58,18 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
 
   const handleTogglePublished = async (id: string) => {
     setPublishingId(id)
-    const result = await toggleNewsletterPublished(id)
+    try {
+      const result = await toggleNewsletterPublished(id)
 
-    if (result.ok) {
-      noticeSuccess(result.message || "Newsletter visibility updated successfully")
-      router.refresh()
-    } else {
-      noticeFailure(result.message || "Error updating newsletter visibility")
+      if (result.ok) {
+        noticeSuccess(result.message || "Newsletter visibility updated successfully")
+        router.refresh()
+      } else {
+        noticeFailure(result.message || "Error updating newsletter visibility")
+      }
+    } catch {
+      noticeFailure("Error updating newsletter visibility")
+    } finally {
       setPublishingId(null)
     }
   }

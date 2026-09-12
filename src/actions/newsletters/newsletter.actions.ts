@@ -51,7 +51,9 @@ export const getAllNewsletters = async () => {
       },
       orderBy: [
         { year: 'desc' },
-        { month: 'desc' }
+        { month: 'desc' },
+        { createdAt: 'desc' },
+        { id: 'asc' }
       ]
     })
 
