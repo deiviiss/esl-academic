@@ -1,6 +1,8 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { validateUserAdmin } from '@/actions/auth/validate-user-admin'
+import { revalidatePath } from 'next/cache'
 import {
   deleteCloudinaryResources,
   getSignedImageUrl,
@@ -15,6 +17,7 @@ export const getNewslettersByLevel = async (levelId: string) => {
   try {
     const newsletters = await prisma.newsletter.findMany({
       where: {
+        isPublished: true,
         levels: {
           some: {
             id: levelId
@@ -56,6 +59,47 @@ export const getAllNewsletters = async () => {
   } catch (error: unknown) {
     console.error('Error fetching all newsletters:', error)
     return []
+  }
+}
+
+/**
+ * Toggles newsletter visibility for users while keeping it available to admins.
+ */
+export const toggleNewsletterPublished = async (newsletterId: string) => {
+  const isAdmin = await validateUserAdmin()
+
+  if (!isAdmin) {
+    return { ok: false, message: 'Unauthorized' }
+  }
+
+  try {
+    const newsletter = await prisma.newsletter.findUnique({
+      where: { id: newsletterId },
+      select: { isPublished: true }
+    })
+
+    if (!newsletter) {
+      return { ok: false, message: 'Newsletter not found' }
+    }
+
+    const updatedNewsletter = await prisma.newsletter.update({
+      where: { id: newsletterId },
+      data: { isPublished: !newsletter.isPublished }
+    })
+
+    revalidatePath('/platform/admin/newsletters')
+    revalidatePath('/platform/academy/newsletters')
+
+    return {
+      ok: true,
+      message: updatedNewsletter.isPublished
+        ? 'Newsletter published successfully'
+        : 'Newsletter hidden successfully',
+      newsletter: updatedNewsletter
+    }
+  } catch (error: unknown) {
+    console.error('Error toggling newsletter publication:', error)
+    return { ok: false, message: 'Failed to update newsletter visibility' }
   }
 }
 

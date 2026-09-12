@@ -72,6 +72,9 @@ export default function NewsletterList({ newsletters, selectedChild }: Newslette
                       })()}
                     </div>
                     <CardTitle>{newsletter.title}</CardTitle>
+                    <p className="text-muted-foreground text-sm mt-2">
+                      <strong>Levels:</strong> {newsletter.levels.map((level) => level.name).join(", ")}
+                    </p>
                   </CardHeader>
                   <CardContent className="flex-grow">
                     <p className="text-muted-foreground text-sm">
