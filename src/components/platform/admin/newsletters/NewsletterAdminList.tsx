@@ -200,8 +200,8 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
         ) : selectedGroup ? (
           /* Level 2: Newsletters of selected month */
           <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b">
-              <div className="flex items-center gap-3">
+            <div className="flex flex-col gap-3 pb-4 border-b">
+              <div className="flex items-center justify-between gap-2">
                 <Button
                   variant="outline"
                   size="sm"
@@ -211,19 +211,17 @@ export default function NewsletterAdminList({ newsletters }: NewsletterAdminList
                   <ArrowLeft className="h-4 w-4" />
                   Back to Months
                 </Button>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-2xl font-bold text-foreground">
-                      {selectedGroup.label}
-                    </h2>
-                    <span className="text-xs font-medium px-2.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {selectedGroup.newsletters.length} {selectedGroup.newsletters.length === 1 ? "newsletter" : "newsletters"}
-                    </span>
-                  </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    Showing all newsletters for {selectedGroup.label}
-                  </p>
-                </div>
+                <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-primary/10 text-primary shrink-0">
+                  {selectedGroup.newsletters.length} {selectedGroup.newsletters.length === 1 ? "newsletter" : "newsletters"}
+                </span>
+              </div>
+              <div>
+                <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+                  {selectedGroup.label}
+                </h2>
+                <p className="text-xs md:text-sm text-muted-foreground mt-1">
+                  Showing all newsletters for {selectedGroup.label}
+                </p>
               </div>
             </div>
 
